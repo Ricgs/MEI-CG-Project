@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<materialLib name="MyLib">
+    <shaders>
+        <shader name="ShaderBRDF" vs="shaders/brdf.vert" ps="shaders/brdf.frag" />
+    </shaders>
+    
+    <material name="MatBRDF" >
+        <shader name="ShaderBRDF" >
+                <values>
+                    <valueof uniform = "m_pvm" 
+                             type="RENDERER"
+                             component="PROJECTION_VIEW_MODEL"/>
+
+                    <valueof uniform="m_view"
+                             type="RENDERER"
+                             component = "VIEW" />
+
+                    <valueof uniform="m_model"
+                             type="RENDERER"
+                             component="MODEL_MATRIX" />
+
+                    <valueof uniform="m_normal"
+                             type="RENDERER"
+                             component = "NORMAL" />
+
+                    <valueof uniform="lightDir"
+                             type="LIGHT"
+                             component = "DIRECTION"  id = "0" />   
+                </values>
+
+            </shader>
+    </material>
+</materialLib>

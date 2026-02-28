@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+<project name="Biblioteca de BRDFs" width="1024" height="768">
+    <assets>
+
+        <attributes>
+            <attribute type="RENDERER" name="diffuse" data="VEC4" x="0.0" y="1.0" z="0.0" w="1.0" />
+            <attribute type="RENDERER" name="specular" data="VEC4" x="0.0" y="0.0" z="1.0" w="1.0" />
+            <attribute type="RENDERER" name="shininess" data="FLOAT" value="180.0" />
+        </attributes>
+
+        <cameras>
+            <camera name="MainCamera">
+                <viewport name="MainViewport" />
+                <TYPE value="PERSPECTIVE" />
+                <FOV value="60.0" /> 
+                <NEAR value="0.01" />
+                <FAR value="1000.0" />
+                <POSITION x="0.0" y="0.0" z="3.0" />
+                <VIEW x="0.0" y="0.0" z="-1.0" />
+                <UP x="0.0" y="1.0" z="0.0" />
+            </camera>
+        </cameras>
+
+        <viewports>
+            <viewport name="MainViewport" >
+                <CLEAR_COLOR x="0.0" y="0.0" z="0.0" /> 
+            </viewport>
+        </viewports>
+
+        <lights>
+            <light name="Sun">
+                <DIRECTION x="-2" y="-2" z="-2" />
+            </light>
+        </lights>
+
+        <scenes>
+            <scene name="Sphere">
+                <geometry name="Esfera" type="SPHERE" material="MatBRDF" SLICES="30" STACKS="30" />
+            </scene>
+            <scene name="Plane">
+                <SCALE x="10.0" y="10.0" z="10.0" />
+                <ROTATE x="1.0" y="0.0" z="0.0" angle="-90.0" />
+                <geometry name="Plano" type="SQUARE" /> 
+            </scene>
+        </scenes>
+
+        <materialLibs>
+            <materialLib filename="material.mlib" />
+        </materialLibs>
+    </assets>
+
+    <pipelines>
+        <pipeline name="FixedPipeline" default="true">
+
+            <pass class="default" name="plane" >
+				<scenes>
+                    <scene name="Plane" />
+                </scenes>
+
+                <camera name="MainCamera" />
+
+                <lights>
+                    <light name="Sun" />
+                </lights>
+			</pass>
+
+            <pass class="default" name="Spheres">
+                <COLOR_CLEAR value="false" />
+
+                <scenes instances="5">
+                    <scene name="Sphere" />
+                </scenes>
+
+                <camera name="MainCamera" />
+
+                <lights>
+                    <light name="Sun" />
+                </lights>
+            </pass>
+
+        </pipeline>
+    </pipelines>
+
+    <interface>
+        <window label="Controlos BRDF">
+            <var label="Cor Difusa" type="RENDERER" context="MyLib::MatBRDF" component="diffuse" mode="COLOR" />
+            <var label="Cor Especular" type="RENDERER" context="MyLib::MatBRDF" component="specular" mode="COLOR" />
+            <var label="Brilho" type="RENDERER" context="MyLib::MatBRDF" component="shininess" def="min=1.0 max=256.0" />
+        </window>
+
+        <window label="Configuração de Iluminação">
+            <var label="Cor do Sol" type="LIGHT" context="Sun" component="COLOR" mode="COLOR"/>
+            <var label="Direção do Sol" type="LIGHT" context="Sun" component="DIRECTION" mode="DIRECTION"/>
+        </window>
+    </interface>
+</project>
