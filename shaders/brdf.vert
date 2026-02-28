@@ -19,16 +19,15 @@ out Data {
 
 void main() {
     
-        // 1. Calcular a nova posição baseada no ID da instância
+    // 1. Calcular a nova posição baseada no ID da instância
     vec4 offsetPos = position;
     
     // Distância entre cada esfera (ajusta conforme o tamanho da tua esfera)
-    float espacamento = 2.5; 
+    float espacamento = 3; 
     
     // Dispor numa grelha de 10x10 usando o gl_InstanceID
     // (Se tiveres 100 instâncias, isto vai de 0 a 99)
-    offsetPos.x += float(gl_InstanceID % 10) * espacamento;
-    offsetPos.z += float(gl_InstanceID / 10) * espacamento;
+    offsetPos.x += (float(gl_InstanceID) - 2.0) * espacamento;
 
     // 2. Calcular a posição do vértice no espaço de câmara usando a posição com offset
     vec4 posEye = m_view * m_model * offsetPos;

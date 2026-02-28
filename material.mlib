@@ -25,7 +25,24 @@
 
                     <valueof uniform="lightDir"
                              type="LIGHT"
-                             component = "DIRECTION"  id = "0" />   
+                             context="Sun"
+                             component = "DIRECTION"  
+                             id = "0" />   
+                    
+                    <valueof uniform="diffuse" 
+                             type="RENDERER" 
+                             context="CURRENT" 
+                             component="diffuse" />
+
+                    <valueof uniform="specular" 
+                             type="RENDERER" 
+                             context="CURRENT" 
+                             component="specular" />
+
+                    <valueof uniform="shininess" 
+                             type="RENDERER" 
+                             context="CURRENT" 
+                             component="shininess" />
                 </values>
 
             </shader>

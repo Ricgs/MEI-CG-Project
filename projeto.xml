@@ -15,9 +15,10 @@
                 <FOV value="60.0" /> 
                 <NEAR value="0.01" />
                 <FAR value="1000.0" />
-                <POSITION x="0.0" y="0.0" z="3.0" />
+                <POSITION x="6.542" y="1.592" z="2.456" />
                 <VIEW x="0.0" y="0.0" z="-1.0" />
                 <UP x="0.0" y="1.0" z="0.0" />
+                <LOOK_AT_POINT x="5.613" y="1.383" z="2.150" />
             </camera>
         </cameras>
 
@@ -37,11 +38,10 @@
             <scene name="Sphere">
                 <geometry name="Esfera" type="SPHERE" material="MatBRDF" SLICES="30" STACKS="30" />
             </scene>
-            <scene name="Plane">
-                <SCALE x="10.0" y="10.0" z="10.0" />
-                <ROTATE x="1.0" y="0.0" z="0.0" angle="-90.0" />
-                <geometry name="Plano" type="SQUARE" /> 
-            </scene>
+            <scene name="Plane" >
+				<SCALE x="200" y="200" z="200" />
+				<file name="models/plane.obj"/>
+			</scene>
         </scenes>
 
         <materialLibs>
