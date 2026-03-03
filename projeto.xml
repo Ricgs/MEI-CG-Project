@@ -12,12 +12,9 @@
             <camera name="MainCamera">
                 <viewport name="MainViewport" />
                 <TYPE value="PERSPECTIVE" />
-                <FOV value="60.0" /> 
                 <NEAR value="0.01" />
-                <FAR value="1000.0" />
                 <POSITION x="6.542" y="1.592" z="2.456" />
                 <VIEW x="0.0" y="0.0" z="-1.0" />
-                <UP x="0.0" y="1.0" z="0.0" />
                 <LOOK_AT_POINT x="5.613" y="1.383" z="2.150" />
             </camera>
         </cameras>
@@ -36,6 +33,7 @@
 
         <scenes>
             <scene name="Sphere">
+                <TRANSLATE x="0" y="1" z= "0" />
                 <geometry name="Esfera" type="SPHERE" material="MatBRDF" SLICES="30" STACKS="30" />
             </scene>
             <scene name="Plane" >
@@ -56,9 +54,7 @@
 				<scenes>
                     <scene name="Plane" />
                 </scenes>
-
                 <camera name="MainCamera" />
-
                 <lights>
                     <light name="Sun" />
                 </lights>
@@ -75,6 +71,7 @@
 
                 <lights>
                     <light name="Sun" />
+                    <!-- ADD CUSTOM LIGHT FOR MATERIALS TEST -->
                 </lights>
             </pass>
 
