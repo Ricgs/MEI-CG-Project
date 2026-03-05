@@ -37,7 +37,7 @@
                 <file name="models/sphere.obj"/>
             </scene>
             <scene name="Plane" >
-				<SCALE x="200" y="200" z="200" />
+				<SCALE x="50" y="50" z="50" />
 				<file name="models/plane.obj"/>
 			</scene>
         </scenes>
@@ -58,6 +58,9 @@
                 <lights>
                     <light name="Sun" />
                 </lights>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="MyLib" toMaterial="MatFloor" />
+                </materialMaps>
 			</pass>
 
             <pass class="default" name="Spheres">
@@ -84,9 +87,9 @@
 
     <interface>
         <window label="Controlos BRDF">
-            <var label="Cor Difusa" type="RENDERER" context="MyLib::MatBRDF" component="diffuse" mode="COLOR" />
-            <var label="Cor Especular" type="RENDERER" context="MyLib::MatBRDF" component="specular" mode="COLOR" />
-            <var label="Brilho" type="RENDERER" context="MyLib::MatBRDF" component="shininess" def="min=1.0 max=256.0" />
+            <var label="Cor Difusa" type="RENDERER" context="CURRENT" component="diffuse" mode="COLOR" />
+            <var label="Cor Especular" type="RENDERER" context="CURRENT" component="specular" mode="COLOR" />
+            <var label="Brilho" type="RENDERER" context="CURRENT" component="shininess" def="min=1.0 max=256.0" />
         </window>
 
         <window label="Configuração de Iluminação">

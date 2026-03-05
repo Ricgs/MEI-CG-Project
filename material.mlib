@@ -1,53 +1,45 @@
 <?xml version="1.0" ?>
 <materialLib name="MyLib">
+    <textures>
+        <texture name="TexFloor" filename="textures/avPlatanosLosango.jpg" mipmap="true" />
+    </textures>
+
     <shaders>
         <shader name="ShaderBRDF" vs="shaders/brdf.vert" ps="shaders/brdf.frag" />
+        <shader name="Shaderfloor" vs="shaders/floor.vert" ps="shaders/floor.frag" />
     </shaders>
-    
-    <materials>
 
-        <material name="MatBRDF" >
-            <shader name="ShaderBRDF" >
-                    <values>
-                        <valueof uniform = "m_pvm" 
-                                 type="RENDERER"
-                                 component="PROJECTION_VIEW_MODEL"/>
-    
-                        <valueof uniform="m_view"
-                                 type="RENDERER"
-                                 component = "VIEW" />
-    
-                        <valueof uniform="m_model"
-                                 type="RENDERER"
-                                 component="MODEL" />
-    
-                        <valueof uniform="m_normal"
-                                 type="RENDERER"
-                                 component = "NORMAL" />
-    
-                        <valueof uniform="lightDir"
-                                 type="LIGHT"
-                                 context="Sun"
-                                 component = "DIRECTION"  
-                                 id = "0" />   
-                        
-                        <valueof uniform="diffuse" 
-                                 type="RENDERER" 
-                                 context="CURRENT" 
-                                 component="diffuse" />
-    
-                        <valueof uniform="specular" 
-                                 type="RENDERER" 
-                                 context="CURRENT" 
-                                 component="specular" />
-    
-                        <valueof uniform="shininess" 
-                                 type="RENDERER" 
-                                 context="CURRENT" 
-                                 component="shininess" />
-                    </values>
-    
-                </shader>
+    <materials>
+        <material name="MatBRDF">
+            <shader name="ShaderBRDF">
+                <values>
+                    <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL" />
+                    <valueof uniform="m_view" type="RENDERER" component="VIEW" />
+                    <valueof uniform="m_model" type="RENDERER" component="MODEL" />
+                    <valueof uniform="m_normal" type="RENDERER" component="NORMAL" />
+                    <valueof uniform="lightDir" type="LIGHT" context="Sun" component="DIRECTION" />
+                    <valueof uniform="diffuse" type="RENDERER" component="diffuse" />
+                    <valueof uniform="specular" type="RENDERER" component="specular" />
+                    <valueof uniform="shininess" type="RENDERER" component="shininess" />
+                </values>
+            </shader>
+        </material>
+
+        <material name="MatFloor">
+            <shader name="Shaderfloor">
+                <values>
+                    <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL"/>
+                    <valueof uniform="m_view" type="RENDERER" component="VIEW" />
+                    <valueof uniform="m_model" type="RENDERER" component="MODEL" />
+                    <valueof uniform="m_normal" type="RENDERER" component="NORMAL" />
+                    <valueof uniform="lightDir" type="LIGHT" context="Sun" component="DIRECTION" id="0" />   
+                    
+                    <valueof uniform="texfloor" type="TEXTURE_BINDING" component="UNIT" id="0" />
+                </values>
+            </shader>
+            <textures>
+                <texture name="TexFloor" UNIT="0" /> 
+            </textures>
         </material>
     </materials>
 </materialLib>
