@@ -1,13 +1,11 @@
 #version 460
 
-// Recebe dados do Vertex Shader
 in Data {
     vec3 normal;
     vec3 lightDir;
     vec3 viewDir;
 } DataIn;
 
-// Recebe variaveis do XML (Interface)
 uniform vec4 diffuse;
 uniform vec4 specular;
 uniform float shininess;

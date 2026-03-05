@@ -1,6 +1,5 @@
 #version 460
 
-// input streams
 in vec4 position;
 in vec3 normal;
 
@@ -9,7 +8,6 @@ uniform mat4 m_model;
 uniform mat3 m_normal;
 uniform vec4 lightDir;
 
-// Dados para enviar ao Fragment Shader
 out Data {
     vec3 normal;
     vec3 lightDir;
