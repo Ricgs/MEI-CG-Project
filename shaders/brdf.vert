@@ -3,8 +3,7 @@
 in vec4 position;
 in vec3 normal;
 
-uniform mat4 m_pvm, m_view;
-uniform mat4 m_model;
+uniform mat4 m_pvm, m_view, m_model;
 uniform mat3 m_normal;
 uniform vec4 lightDir;
 
@@ -24,8 +23,8 @@ void main() {
     // 2. Calcular a posição do vértice no espaço de câmara usando a posição com offset
     vec4 posEye = m_view * m_model * offsetPos;
 
-    DataOut.normal = normalize(m_normal * normal.xyz);
-    DataOut.lightDir = normalize(vec3(m_view * vec4(-lightDir.xyz, 0.0)));
+    DataOut.normal = normalize(m_normal * normal);
+    DataOut.lightDir = normalize(vec3(m_view * -lightDir));
     DataOut.viewDir = normalize(-posEye.xyz);
 
     // 3. Posição final do vértice no ecrã usando a posição com offset

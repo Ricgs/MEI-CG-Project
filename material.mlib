@@ -13,7 +13,7 @@
         <material name="MatBRDF">
             <shader name="ShaderBRDF">
                 <values>
-                    <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL" />
+                    <valueof uniform="m_pvm" type="RENDERER"            component="PROJECTION_VIEW_MODEL" />
                     <valueof uniform="m_view" type="RENDERER" component="VIEW" />
                     <valueof uniform="m_model" type="RENDERER" component="MODEL" />
                     <valueof uniform="m_normal" type="RENDERER" component="NORMAL" />
