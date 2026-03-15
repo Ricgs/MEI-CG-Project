@@ -5,28 +5,43 @@ in vec3 normal;
 
 uniform mat4 m_pvm, m_view, m_model;
 uniform mat3 m_normal;
-uniform vec4 lightDir;
+
+uniform vec3 camPos;
+uniform vec3 lightPos;
+uniform vec3 lightColorUniform;
+uniform vec3 pbr_albedo;
+uniform vec3 pbr_emissivity;
+uniform float pbr_roughness;
+uniform vec3 pbr_baseflectance;
 
 out Data {
+    vec3 fragmentPosition;
     vec3 normal;
-    vec3 lightDir;
-    vec3 viewDir;
+    vec3 cameraPosition;
+    vec3 lightPosition;
+    vec3 lightColor;
+    vec3 albedoMesh;
+    vec3 emissivityMesh;
+    float roughness;
+    vec3 baseflectance;
 } DataOut;
 
 void main() {
     
-    // 1. Calcular a nova posição baseada no ID da instância
     vec4 offsetPos = position;
     float espacamento = 3; 
     offsetPos.x += (float(gl_InstanceID) - 2.0) * espacamento;
 
-    // 2. Calcular a posição do vértice no espaço de câmara usando a posição com offset
     vec4 posEye = m_view * m_model * offsetPos;
 
     DataOut.normal = normalize(m_normal * normal);
-    DataOut.lightDir = normalize(vec3(m_view * -lightDir));
-    DataOut.viewDir = normalize(-posEye.xyz);
+    DataOut.cameraPosition = camPos;
+    DataOut.lightPosition = lightPos;
+    DataOut.lightColor = lightColorUniform;
+    DataOut.albedoMesh = pbr_albedo;
+    DataOut.emissivityMesh = pbr_emissivity;
+    DataOut.roughness = pbr_roughness;
+    DataOut.baseflectance = pbr_baseflectance;
 
-    // 3. Posição final do vértice no ecrã usando a posição com offset
     gl_Position = m_pvm * offsetPos;
 }

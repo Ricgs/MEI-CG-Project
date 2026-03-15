@@ -1,37 +1,89 @@
 #version 460
 
 in Data {
+    vec3 fragmentPosition;
     vec3 normal;
-    vec3 lightDir;
-    vec3 viewDir;
+    vec3 cameraPosition;
+    vec3 lightPosition;
+    vec3 lightColor;
+    vec3 albedoMesh;
+    vec3 emissivityMesh;
+    float roughness;
+    vec3 baseflectance;
 } DataIn;
-
-uniform vec4 diffuse;
-uniform vec4 specular;
-uniform float shininess;
 
 out vec4 outputColor;
 
-void main() {
-    // Renormalizar os vetores interpolados
-    vec3 n = normalize(DataIn.normal);
-    vec3 l = normalize(DataIn.lightDir);
-    vec3 v = normalize(DataIn.viewDir);
+const float PI = 3.14159265359;
 
-    // --- BRDF DIFUSA (LAMBERT) ---
-    // Intensidade depende do ângulo entre Normal e Luz
-    float intensityDiff = max(dot(n, l), 0.0);
-    vec4 diffTerm = diffuse * intensityDiff;
+// Fresnel-Schlick Function
+vec3 F(vec3 F0, vec3 V, vec3 H) {
 
-    // --- BRDF ESPECULAR (BLINN-PHONG) ---
-    // Usa o vetor Halfway (H)
-    vec3 h = normalize(l + v);
-    float intensitySpec = pow(max(dot(n, h), 0.0), shininess);
-    vec4 specTerm = specular * intensitySpec;
+    return F0 + (vec3(1.0) - F0) * pow(1.0 - max(dot(V, H), 0.0), 5.0);
+}
 
-    // --- COMBINAÇÃO FINAL ---
-    // Ambiente simples (constante) + Difusa + Especular
-    vec4 ambient = vec4(0.1, 0.1, 0.1, 1.0) * diffuse;
+// GGX/Trowbridge-Reitz Normal Distribution Function
+float D(float alpha, vec3 N, vec3 H) {
+
+    float numerator = pow(alpha, 2.0);
+
+    float NdotH = max(dot(N,H), 0.0);
+    float denominator = PI * pow(pow(NdotH, 2.0) * (pow(alpha, 2.0) - 1.0) + 1.0, 2.0);
+    denominator = max(denominator, 0.000001);
+
+    return numerator/denominator;
+}
+
+// Schlick-Beckmann Geometry Shadowing Function
+float G1(float alpha, vec3 N, vec3 X) {
+
+    float numerator = max(dot(N, X), 0.0);
+
+    float k = alpha / 2.0;
+    float denominator = max(dot(N, X), 0.0) * (1.0 - k) + k;
+    denominator = max(denominator, 0.000001);
+
+    return numerator / denominator;
+}
+
+// Smith Model
+float G(float alpha, vec3 N, vec3 V, vec3 L) {
+
+    return G1(alpha, N, V) * G1(alpha, N, L);
+}
+
+// Rendering Equation for one light source
+vec3 PBR() {
+
+    // Main vectors
+    vec3 N = normalize(DataIn.normal);
+    vec3 V = normalize(DataIn.cameraPosition - DataIn.fragmentPosition);
+    // For directional lights
+    //vec3 L = normalize(DataIn.lightPosition);
+    // For point lights and spotlights
+    vec3 L = normalize(DataIn.lightPosition - DataIn.fragmentPosition);
+    vec3 H = normalize(V + L);
+
+    vec3 F0 = DataIn.baseflectance;
+    float alpha = DataIn.roughness * DataIn.roughness;
     
-    outputColor = ambient + diffTerm + specTerm;
+    vec3 ks = F(F0, V, H);
+    vec3 kd = vec3(1.0) - ks;
+
+    vec3 lambert = DataIn.albedoMesh / PI;
+
+    vec3 cookTorranceNumerator = D(alpha, N, H) * G(alpha, N, V, L) * F(F0, V, H);
+    float cookTorranceDenominator = 4.0 * max(dot(V, N), 0.0) * max(dot(L, N), 0.0);
+    cookTorranceDenominator = max(cookTorranceDenominator, 0.000001);
+    vec3 cookTorrance = cookTorranceNumerator / cookTorranceDenominator;
+
+    vec3 BRDF = kd * lambert + cookTorrance;
+    vec3 outgoingLight = DataIn.emissivityMesh + BRDF + DataIn.lightColor * max(dot(L, N), 0.0);
+
+    return outgoingLight;
+}
+
+void main() {
+
+    outputColor = vec4(PBR(), 1.0);
 }

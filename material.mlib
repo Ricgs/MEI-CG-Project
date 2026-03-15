@@ -13,19 +13,24 @@
         <material name="MatBRDF">
             <shader name="ShaderBRDF">
                 <values>
-                    <valueof uniform="m_pvm" type="RENDERER"            component="PROJECTION_VIEW_MODEL" />
+                    <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL" />
                     <valueof uniform="m_view" type="RENDERER" component="VIEW" />
                     <valueof uniform="m_model" type="RENDERER" component="MODEL" />
                     <valueof uniform="m_normal" type="RENDERER" component="NORMAL" />
-                    <valueof uniform="lightDir" type="LIGHT" context="Sun" component="DIRECTION" />
-                    <valueof uniform="diffuse" type="RENDERER" component="diffuse" />
-                    <valueof uniform="specular" type="RENDERER" component="specular" />
-                    <valueof uniform="shininess" type="RENDERER" component="shininess" />
+                    
+                    <valueof uniform="camPos" type="CAMERA" context="CURRENT" component="POSITION" />
+                    <valueof uniform="lightPos" type="LIGHT" context="Sun" component="POSITION" />
+                    <valueof uniform="lightColorUniform" type="LIGHT" context="Sun" component="COLOR" />
+                    
+                    <valueof uniform="pbr_albedo" type="RENDERER" component="albedo" />
+                    <valueof uniform="pbr_emissivity" type="RENDERER" component="emissivity" />
+                    <valueof uniform="pbr_roughness" type="RENDERER" component="roughness" />
+                    <valueof uniform="pbr_baseflectance" type="RENDERER" component="baseflect" />
                 </values>
             </shader>
         </material>
 
-        <material name="MatFloor">
+        <!--material name="MatFloor">
             <shader name="Shaderfloor">
                 <values>
                     <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL"/>
@@ -40,6 +45,6 @@
             <textures>
                 <texture name="TexFloor" UNIT="0" /> 
             </textures>
-        </material>
+        </material-->
     </materials>
 </materialLib>
