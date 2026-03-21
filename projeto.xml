@@ -14,9 +14,9 @@
                 <viewport name="MainViewport" />
                 <TYPE value="PERSPECTIVE" />
                 <NEAR value="0.01" />
-                <POSITION x="6.542" y="1.592" z="2.456" />
+                <POSITION x="0.586" y="5.036" z="-10.636" />
                 <VIEW x="0.0" y="0.0" z="-1.0" />
-                <LOOK_AT_POINT x="5.613" y="1.383" z="2.150" />
+                <LOOK_AT_POINT x="0.562" y="4.750" z="-9.678" />
             </camera>
         </cameras>
 
@@ -28,9 +28,8 @@
 
         <lights>
             <light name="Sun">
-                <POSITION x="-52" y="77.0" z="-27.0" />
-				<DIRECTION x="0.597" y="-0.390" z="0.700" />
-                <COLOR r="0.9" g="0.9" b="0.9" />
+                <DIRECTION x="-0.5" y="-1.0" z="-0.5" />
+                <COLOR r="5.0" g="5.0" b="5.0" />
             </light>
         </lights>
 
@@ -43,6 +42,11 @@
 				<SCALE x="50" y="50" z="50" />
 				<file name="models/plane.obj"/>
 			</scene>
+            <scene name="SkyBox" >
+                <geometry name="skyBox" material="skybox" type="BOX" >
+                    <SCALE x="10" y="10" z="10" />
+                </geometry>
+            </scene>
         </scenes>
 
         <materialLibs>
@@ -53,14 +57,33 @@
     <pipelines>
         <pipeline name="FixedPipeline" default="true">
 
-            <!--pass class="default" name="plane" >
+            <pass class="default" name="SkyBox">
+                <COLOR_CLEAR value="false" />
+
+                <scenes>
+                    <scene name="SkyBox" />
+                </scenes>
+
+                <camera name="MainCamera" />
+
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="MyLib" toMaterial="MatSkybox" />
+                </materialMaps>
+            </pass>
+
+            <!--pass class="default" name="Plane" >
+                <COLOR_CLEAR value="false" />
+
 				<scenes>
                     <scene name="Plane" />
                 </scenes>
+
                 <camera name="MainCamera" />
+
                 <lights>
                     <light name="Sun" />
                 </lights>
+
                 <materialMaps>
                     <map fromMaterial="*" toLibrary="MyLib" toMaterial="MatFloor" />
                 </materialMaps>
@@ -96,9 +119,8 @@
         </window>
 
         <window label="Configuração de Iluminação">
-            <var label="Cor do Sol" type="LIGHT" context="Sun" component="COLOR" mode="COLOR"/>
-            <var label="Direção do Sol" type="LIGHT" context="Sun" component="DIRECTION" mode="DIRECTION"/>
-            <var label="Posição do Sol" type="LIGHT" context="Sun" component="POSITION" def="min=0.01 max=10.0"/>
+            <var label="Cor do Sol" type="LIGHT" context="Sun" component="COLOR" mode="COLOR" def="min=-50.0 max=50.0"/>
+            <var label="Direção do Sol" type="LIGHT" context="Sun" component="DIRECTION" def="min=-50.0 max=50.0"/>
         </window>
     </interface>
 </project>

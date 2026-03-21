@@ -7,7 +7,7 @@ uniform mat4 m_pvm, m_view, m_model;
 uniform mat3 m_normal;
 
 uniform vec3 camPos;
-uniform vec3 lightPos;
+uniform vec3 lightDir;
 uniform vec3 lightColorUniform;
 uniform vec3 pbr_albedo;
 uniform vec3 pbr_emissivity;
@@ -18,7 +18,7 @@ out Data {
     vec3 fragmentPosition;
     vec3 normal;
     vec3 cameraPosition;
-    vec3 lightPosition;
+    vec3 lightDirection;
     vec3 lightColor;
     vec3 albedoMesh;
     vec3 emissivityMesh;
@@ -29,14 +29,15 @@ out Data {
 void main() {
     
     vec4 offsetPos = position;
-    float espacamento = 3; 
+    float espacamento = 3.0; 
     offsetPos.x += (float(gl_InstanceID) - 2.0) * espacamento;
 
     vec4 posEye = m_view * m_model * offsetPos;
 
-    DataOut.normal = normalize(m_normal * normal);
+    DataOut.fragmentPosition = vec3(m_model * offsetPos);
+    DataOut.normal = normalize(mat3(m_model) * normal);
     DataOut.cameraPosition = camPos;
-    DataOut.lightPosition = lightPos;
+    DataOut.lightDirection = lightDir;
     DataOut.lightColor = lightColorUniform;
     DataOut.albedoMesh = pbr_albedo;
     DataOut.emissivityMesh = pbr_emissivity;

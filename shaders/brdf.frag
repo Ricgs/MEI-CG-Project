@@ -4,7 +4,7 @@ in Data {
     vec3 fragmentPosition;
     vec3 normal;
     vec3 cameraPosition;
-    vec3 lightPosition;
+    vec3 lightDirection;
     vec3 lightColor;
     vec3 albedoMesh;
     vec3 emissivityMesh;
@@ -59,9 +59,7 @@ vec3 PBR() {
     vec3 N = normalize(DataIn.normal);
     vec3 V = normalize(DataIn.cameraPosition - DataIn.fragmentPosition);
     // For directional lights
-    //vec3 L = normalize(DataIn.lightPosition);
-    // For point lights and spotlights
-    vec3 L = normalize(DataIn.lightPosition - DataIn.fragmentPosition);
+    vec3 L = normalize(-DataIn.lightDirection);
     vec3 H = normalize(V + L);
 
     vec3 F0 = DataIn.baseflectance;
@@ -72,18 +70,22 @@ vec3 PBR() {
 
     vec3 lambert = DataIn.albedoMesh / PI;
 
-    vec3 cookTorranceNumerator = D(alpha, N, H) * G(alpha, N, V, L) * F(F0, V, H);
+    vec3 cookTorranceNumerator = D(alpha, N, H) * G(alpha, N, V, L) * ks;
     float cookTorranceDenominator = 4.0 * max(dot(V, N), 0.0) * max(dot(L, N), 0.0);
     cookTorranceDenominator = max(cookTorranceDenominator, 0.000001);
     vec3 cookTorrance = cookTorranceNumerator / cookTorranceDenominator;
 
     vec3 BRDF = kd * lambert + cookTorrance;
-    vec3 outgoingLight = DataIn.emissivityMesh + BRDF + DataIn.lightColor * max(dot(L, N), 0.0);
+    vec3 outgoingLight = DataIn.emissivityMesh + (BRDF * DataIn.lightColor * max(dot(L, N), 0.0));
 
     return outgoingLight;
 }
 
 void main() {
 
+    vec3 debugNormal = normalize(DataIn.normal) * 0.5 + 0.5;
+    
+    outputColor = vec4(debugNormal, 1.0);
+    
     outputColor = vec4(PBR(), 1.0);
 }

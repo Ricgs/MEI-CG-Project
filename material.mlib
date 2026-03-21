@@ -2,16 +2,40 @@
 <materialLib name="MyLib">
     <textures>
         <texture name="TexFloor" filename="textures/avPlatanosLosango.jpg" mipmap="true" />
+
+        <texture name="left" filename="textures/nissibeach_cm/negx.jpg" />
+        <texture name="right" filename="textures/nissibeach_cm/posx.jpg" />
+        <texture name="front" filename="textures/nissibeach_cm/posz.jpg" />
+        <texture name="back" filename="textures/nissibeach_cm/negz.jpg" />
+        <texture name="top" filename="textures/nissibeach_cm/posy.jpg" />
+        <texture name="bottom" filename="textures/nissibeach_cm/negy.jpg" />
+
+        <cubeMap name="CM" 
+            filePosX="textures/nissibeach_cm/posx.jpg"
+            fileNegX="textures/nissibeach_cm/negx.jpg"
+            filePosY="textures/nissibeach_cm/posy.jpg"
+            fileNegY="textures/nissibeach_cm/negy.jpg"
+            filePosZ="textures/nissibeach_cm/posz.jpg"
+            fileNegZ="textures/nissibeach_cm/negz.jpg"	
+        />
     </textures>
 
     <shaders>
-        <shader name="ShaderBRDF" vs="shaders/brdf.vert" ps="shaders/brdf.frag" />
-        <shader name="Shaderfloor" vs="shaders/floor.vert" ps="shaders/floor.frag" />
+        <shader name="BRDF" vs="shaders/brdf.vert" ps="shaders/brdf.frag" />
+        <shader name="Floor" vs="shaders/floor.vert" ps="shaders/floor.frag" />
+        <shader name="SkyBox" vs="shaders/skybox.vert" ps="shaders/skybox.frag" />
     </shaders>
+
+    <states>
+        <state name="Skybox" >
+            <CULL_TYPE value="FRONT" />
+            <DEPTH_MASK value="false" />
+        </state>
+    </states>
 
     <materials>
         <material name="MatBRDF">
-            <shader name="ShaderBRDF">
+            <shader name="BRDF">
                 <values>
                     <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL" />
                     <valueof uniform="m_view" type="RENDERER" component="VIEW" />
@@ -19,7 +43,7 @@
                     <valueof uniform="m_normal" type="RENDERER" component="NORMAL" />
                     
                     <valueof uniform="camPos" type="CAMERA" context="CURRENT" component="POSITION" />
-                    <valueof uniform="lightPos" type="LIGHT" context="Sun" component="POSITION" />
+                    <valueof uniform="lightDir" type="LIGHT" context="Sun" component="DIRECTION" />
                     <valueof uniform="lightColorUniform" type="LIGHT" context="Sun" component="COLOR" />
                     
                     <valueof uniform="pbr_albedo" type="RENDERER" component="albedo" />
@@ -30,8 +54,8 @@
             </shader>
         </material>
 
-        <!--material name="MatFloor">
-            <shader name="Shaderfloor">
+        <material name="MatFloor">
+            <shader name="Floor">
                 <values>
                     <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL"/>
                     <valueof uniform="m_view" type="RENDERER" component="VIEW" />
@@ -45,6 +69,53 @@
             <textures>
                 <texture name="TexFloor" UNIT="0" /> 
             </textures>
-        </material-->
+        </material>
+
+        <material name="MatSkybox" >
+            <shader name="SkyBox" >
+                <values>
+                    <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL" />
+                    <valueof uniform="cam_pos" type="CAMERA" component="POSITION" />
+                    <valueof uniform="tex_back" type="TEXTURE_BINDING" component="UNIT" id ="0" />
+                    <valueof uniform="tex_left" type="TEXTURE_BINDING" component="UNIT" id ="1" />
+                    <valueof uniform="tex_front" type="TEXTURE_BINDING" component="UNIT" id ="2" />
+                    <valueof uniform="tex_right" type="TEXTURE_BINDING" component="UNIT" id ="3" />
+                    <valueof uniform="tex_top" type="TEXTURE_BINDING" component="UNIT" id ="4" />
+                    <valueof uniform="tex_bottom" type="TEXTURE_BINDING" component="UNIT" id ="5" />
+                    <valueof uniform="tex_cm" type="TEXTURE_BINDING" component="UNIT" id ="6" />
+                </values>
+            </shader>
+            <textures>
+                <texture name="back" UNIT="0" >
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="left" UNIT="1" >
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="front" UNIT="2" >
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="right" UNIT="3" >
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="top" UNIT="4" >
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="bottom" UNIT="5" >
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="CM" UNIT="6" >
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+            </textures>
+            <state name="Skybox" />
+        </material>
     </materials>
 </materialLib>
