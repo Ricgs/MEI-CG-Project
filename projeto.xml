@@ -3,7 +3,7 @@
     <assets>
 
         <attributes>
-            <attribute type="RENDERER" name="albedo" data="VEC3" x="0.8" y="0.1" z="0.1" />
+            <attribute type="RENDERER" name="albedo" data="VEC3" x="5.0" y="5.0" z="5.0" />
             <attribute type="RENDERER" name="emissivity" data="VEC3" x="0.0" y="0.0" z="0.0" />
             <attribute type="RENDERER" name="baseflect" data="VEC3" x="0.04" y="0.04" z="0.04" /> 
             <attribute type="RENDERER" name="roughness" data="FLOAT" value="0.3" />
@@ -29,7 +29,7 @@
         <lights>
             <light name="Sun">
                 <DIRECTION x="-0.5" y="-1.0" z="-0.5" />
-                <COLOR r="5.0" g="5.0" b="5.0" />
+                <COLOR r="0.0" g="0.0" b="0.0" />
             </light>
         </lights>
 

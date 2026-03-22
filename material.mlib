@@ -1,8 +1,6 @@
 <?xml version="1.0" ?>
 <materialLib name="MyLib">
     <textures>
-        <texture name="TexFloor" filename="textures/avPlatanosLosango.jpg" mipmap="true" />
-
         <texture name="left" filename="textures/nissibeach_cm/negx.jpg" />
         <texture name="right" filename="textures/nissibeach_cm/posx.jpg" />
         <texture name="front" filename="textures/nissibeach_cm/posz.jpg" />
@@ -10,7 +8,7 @@
         <texture name="top" filename="textures/nissibeach_cm/posy.jpg" />
         <texture name="bottom" filename="textures/nissibeach_cm/negy.jpg" />
 
-        <cubeMap name="CM" 
+        <cubeMap name="CM" mipmap="true" 
             filePosX="textures/nissibeach_cm/posx.jpg"
             fileNegX="textures/nissibeach_cm/negx.jpg"
             filePosY="textures/nissibeach_cm/posy.jpg"
@@ -22,7 +20,6 @@
 
     <shaders>
         <shader name="BRDF" vs="shaders/brdf.vert" ps="shaders/brdf.frag" />
-        <shader name="Floor" vs="shaders/floor.vert" ps="shaders/floor.frag" />
         <shader name="SkyBox" vs="shaders/skybox.vert" ps="shaders/skybox.frag" />
     </shaders>
 
@@ -50,24 +47,17 @@
                     <valueof uniform="pbr_emissivity" type="RENDERER" component="emissivity" />
                     <valueof uniform="pbr_roughness" type="RENDERER" component="roughness" />
                     <valueof uniform="pbr_baseflectance" type="RENDERER" component="baseflect" />
-                </values>
-            </shader>
-        </material>
 
-        <material name="MatFloor">
-            <shader name="Floor">
-                <values>
-                    <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL"/>
-                    <valueof uniform="m_view" type="RENDERER" component="VIEW" />
-                    <valueof uniform="m_model" type="RENDERER" component="MODEL" />
-                    <valueof uniform="m_normal" type="RENDERER" component="NORMAL" />
-                    <valueof uniform="lightDir" type="LIGHT" context="Sun" component="DIRECTION" id="0" />   
-                    
-                    <valueof uniform="texfloor" type="TEXTURE_BINDING" component="UNIT" id="0" />
+                    <valueof uniform="environmentMap" type="TEXTURE_BINDING" component="UNIT" id="0" />
                 </values>
             </shader>
             <textures>
-                <texture name="TexFloor" UNIT="0" /> 
+                <texture name="CM" UNIT="0">
+                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
             </textures>
         </material>
 
