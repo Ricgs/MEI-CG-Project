@@ -3,9 +3,9 @@
     <assets>
 
         <attributes>
-            <attribute type="RENDERER" name="albedo" data="VEC3" x="5.0" y="5.0" z="5.0" />
-            <attribute type="RENDERER" name="emissivity" data="VEC3" x="0.0" y="0.0" z="0.0" />
-            <attribute type="RENDERER" name="baseflect" data="VEC3" x="0.04" y="0.04" z="0.04" /> 
+            <attribute type="RENDERER" name="albedo" data="VEC4" x="5.0" y="5.0" z="5.0" />
+            <attribute type="RENDERER" name="emissivity" data="VEC4" x="0.0" y="0.0" z="0.0" />
+            <attribute type="RENDERER" name="baseflect" data="VEC4" x="0.04" y="0.04" z="0.04" /> 
             <attribute type="RENDERER" name="roughness" data="FLOAT" value="0.3" />
         </attributes>
 
@@ -38,10 +38,6 @@
                 <TRANSLATE x="0" y="1" z="0" />
                 <file name="models/sphere.obj"/>
             </scene>
-            <scene name="Plane" >
-				<SCALE x="50" y="50" z="50" />
-				<file name="models/plane.obj"/>
-			</scene>
             <scene name="SkyBox" >
                 <geometry name="skyBox" material="skybox" type="BOX" >
                     <SCALE x="10" y="10" z="10" />
@@ -70,24 +66,6 @@
                     <map fromMaterial="*" toLibrary="MyLib" toMaterial="MatSkybox" />
                 </materialMaps>
             </pass>
-
-            <!--pass class="default" name="Plane" >
-                <COLOR_CLEAR value="false" />
-
-				<scenes>
-                    <scene name="Plane" />
-                </scenes>
-
-                <camera name="MainCamera" />
-
-                <lights>
-                    <light name="Sun" />
-                </lights>
-
-                <materialMaps>
-                    <map fromMaterial="*" toLibrary="MyLib" toMaterial="MatFloor" />
-                </materialMaps>
-			</pass-->
 
             <pass class="default" name="Spheres">
                 <COLOR_CLEAR value="false" />
