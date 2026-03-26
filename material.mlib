@@ -48,6 +48,12 @@
                     <valueof uniform="pbr_roughness" type="RENDERER" component="roughness" />
                     <valueof uniform="pbr_baseflectance" type="RENDERER" component="baseflect" />
 
+                    <valueof uniform="pbr_metallic"       type="RENDERER" component="metallic" />
+                    <valueof uniform="pbr_sheen"          type="RENDERER" component="sheen" />
+                    <valueof uniform="pbr_clearcoat"      type="RENDERER" component="clearcoat" />
+                    <valueof uniform="pbr_clearcoatGloss" type="RENDERER" component="clearcoatGloss" />
+                    <valueof uniform="pbr_subsurface"     type="RENDERER" component="subsurface" />
+
                     <valueof uniform="environmentMap" type="TEXTURE_BINDING" component="UNIT" id="0" />
                 </values>
             </shader>

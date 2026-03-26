@@ -1,5 +1,12 @@
 #version 460
 
+// ---------------------------------------------------------------------------
+// Biblioteca de BRDFs — Fragment Shader
+// Linha 0: Lambertian   | Linha 1: Phong/Blinn-Phong
+// Linha 2: Cook-Torrance GGX + Beckmann | Linha 3: Oren-Nayar
+// Linha 4: Disney Principled BRDF
+// ---------------------------------------------------------------------------
+
 in Data {
     vec3 fragmentPosition;
     vec3 normal;
@@ -10,6 +17,12 @@ in Data {
     vec3 emissivityMesh;
     float roughness;
     vec3 baseflectance;
+    float metallic;
+    float sheen;
+    float clearcoat;
+    float clearcoatGloss;
+    float subsurface;
+    flat int brdfMode;
 } DataIn;
 
 out vec4 outputColor;
