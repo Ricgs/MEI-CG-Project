@@ -107,7 +107,8 @@ vec3 PBR() {
     vec3 diffuseIBL = irradiance * DataIn.albedoMesh;
 
     // B. Reflexo Especular (Luz Especular Ambiente)
-    vec3 R = reflect(V, N); // O vetor que "espelha" a nossa câmara
+    vec3 R = reflect(-V, N); // O vetor que "espelha" a nossa câmara
+    R.y = -R.y;
     const float MAX_REFLECTION_LOD = 5.0; // Assume-se que o teu Cubemap gerou pelo menos 5 níveis de mipmap
     // O roughness determina quão nítido ou desfocado é o reflexo (0.0 = mipmap 0, 1.0 = mipmap 5)
     vec3 prefilteredColor = textureLod(environmentMap, R, DataIn.roughness * MAX_REFLECTION_LOD).rgb;

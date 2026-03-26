@@ -61,7 +61,7 @@ void main() {
     DataOut.lightColor = lightColorUniform;
     DataOut.albedoMesh = pbr_albedo.rgb;
     DataOut.emissivityMesh = pbr_emissivity.rgb;
-    DataOut.roughness = instanceRoughness * 3;
+    DataOut.roughness = instanceRoughness * 2.5;
     DataOut.baseflectance = pbr_baseflectance.rgb;
     DataOut.metallic         = pbr_metallic;
     DataOut.sheen            = pbr_sheen;

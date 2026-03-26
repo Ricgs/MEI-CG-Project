@@ -43,16 +43,16 @@
                     <valueof uniform="lightDir" type="LIGHT" context="Sun" component="DIRECTION" />
                     <valueof uniform="lightColorUniform" type="LIGHT" context="Sun" component="COLOR" />
                     
-                    <valueof uniform="pbr_albedo" type="RENDERER" component="albedo" />
-                    <valueof uniform="pbr_emissivity" type="RENDERER" component="emissivity" />
-                    <valueof uniform="pbr_roughness" type="RENDERER" component="roughness" />
-                    <valueof uniform="pbr_baseflectance" type="RENDERER" component="baseflect" />
+                    <valueof uniform="pbr_albedo" type="RENDERER" context="CURRENT" component="albedo" />
+                    <valueof uniform="pbr_emissivity" type="RENDERER" context="CURRENT" component="emissivity" />
+                    <valueof uniform="pbr_roughness" type="RENDERER" context="CURRENT" component="roughness" />
+                    <valueof uniform="pbr_baseflectance" type="RENDERER" context="CURRENT" component="baseflect" />
 
-                    <valueof uniform="pbr_metallic"       type="RENDERER" component="metallic" />
-                    <valueof uniform="pbr_sheen"          type="RENDERER" component="sheen" />
-                    <valueof uniform="pbr_clearcoat"      type="RENDERER" component="clearcoat" />
-                    <valueof uniform="pbr_clearcoatGloss" type="RENDERER" component="clearcoatGloss" />
-                    <valueof uniform="pbr_subsurface"     type="RENDERER" component="subsurface" />
+                    <valueof uniform="pbr_metallic"       type="RENDERER" context="CURRENT" component="metallic" />
+                    <valueof uniform="pbr_sheen"          type="RENDERER" context="CURRENT" component="sheen" />
+                    <valueof uniform="pbr_clearcoat"      type="RENDERER" context="CURRENT" component="clearcoat" />
+                    <valueof uniform="pbr_clearcoatGloss" type="RENDERER" context="CURRENT" component="clearcoatGloss" />
+                    <valueof uniform="pbr_subsurface"     type="RENDERER" context="CURRENT" component="subsurface" />
 
                     <valueof uniform="environmentMap" type="TEXTURE_BINDING" component="UNIT" id="0" />
                 </values>
