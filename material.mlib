@@ -43,10 +43,10 @@
                     <valueof uniform="lightDir" type="LIGHT" context="Sun" component="DIRECTION" />
                     <valueof uniform="lightColorUniform" type="LIGHT" context="Sun" component="COLOR" />
                     
-                    <valueof uniform="pbr_albedo" type="RENDERER" context="CURRENT" component="albedo" />
-                    <valueof uniform="pbr_emissivity" type="RENDERER" context="CURRENT" component="emissivity" />
-                    <valueof uniform="pbr_roughness" type="RENDERER" context="CURRENT" component="roughness" />
-                    <valueof uniform="pbr_baseflectance" type="RENDERER" context="CURRENT" component="baseflect" />
+                    <valueof uniform="pbr_albedo"        type="RENDERER" component="albedo" />
+                    <valueof uniform="pbr_emissivity"    type="RENDERER" component="emissivity" />
+                    <valueof uniform="pbr_roughness"     type="RENDERER" component="roughness" />
+                    <valueof uniform="pbr_baseflectance" type="RENDERER" component="baseflect" />
 
                     <valueof uniform="pbr_metallic"       type="RENDERER" context="CURRENT" component="metallic" />
                     <valueof uniform="pbr_sheen"          type="RENDERER" context="CURRENT" component="sheen" />

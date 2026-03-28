@@ -35,7 +35,7 @@
         <lights>
             <light name="Sun">
                 <DIRECTION x="-0.5" y="-1.0" z="-0.5" />
-                <COLOR r="0.0" g="0.0" b="0.0" />
+                <COLOR r="3.0" g="3.0" b="3.0" />
             </light>
         </lights>
 
