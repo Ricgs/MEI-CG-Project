@@ -30,9 +30,8 @@ vec3 F(vec3 F0, vec3 V, vec3 H) {
 }
 
 // Fresnel-Schlick com roughness
-vec3 fresnelSchlickRoughness(vec3 F0, float cosTheta, float r) {
-    return F0 + (max(vec3(1.0 - r), F0) - F0)
-              * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+vec3 fresnelSchlickRoughness(vec3 F0, float cosTheta, float roughness) {
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 vec2 integratebrdf(float NdotV, float roughness) {
@@ -56,11 +55,9 @@ float D(float alpha, vec3 N, vec3 H) {
 }
 
 // Schlick-Beckmann Geometry Shadowing Function
-float G1(float alpha, vec3 N, vec3 X) {
+float G1(float k, vec3 N, vec3 X) {
 
     float numerator = max(dot(N, X), 0.0);
-
-    float k = alpha / 2.0;
     float denominator = max(dot(N, X), 0.0) * (1.0 - k) + k;
     denominator = max(denominator, 0.000001);
 
@@ -68,9 +65,12 @@ float G1(float alpha, vec3 N, vec3 X) {
 }
 
 // Smith Model
-float G(float alpha, vec3 N, vec3 V, vec3 L) {
+float G(float roughness, vec3 N, vec3 V, vec3 L) {
 
-    return G1(alpha, N, V) * G1(alpha, N, L);
+    float r = (roughness + 1.0);
+    float k = (r * r) / 8.0;
+
+    return G1(k, N, V) * G1(k, N, L);
 }
 
 // Rendering Equation for one light source
@@ -89,7 +89,7 @@ vec3 PBR() {
 
     vec3 lambert = DataIn.albedoMesh / PI;
 
-    vec3  cookTorranceNumerator   = D(alpha, N, H) * G(alpha, N, V, L) * ks_direct;
+    vec3  cookTorranceNumerator   = D(alpha, N, H) * G(DataIn.roughness, N, V, L) * ks_direct;
     float cookTorranceDenominator = 4.0 * max(dot(V, N), 0.0) * max(dot(L, N), 0.0);
     cookTorranceDenominator = max(cookTorranceDenominator, 0.000001);
     vec3 cookTorrance = cookTorranceNumerator / cookTorranceDenominator;
@@ -97,24 +97,33 @@ vec3 PBR() {
     vec3 BRDF_direct = kd_direct * lambert + cookTorrance;
     vec3 directLight = BRDF_direct * DataIn.lightColor * max(dot(L, N), 0.0);
 
-    vec3 ks_env = F(F0, N, V);
+    // Calculamos o NdotV (Garante que esta é a ÚNICA vez que declaras 'float NdotV' na função)
+    float NdotV = max(dot(N, V), 0.0);
+
+    // 1. Calculamos o Fresnel para o IBL (com injeção de roughness)
+    vec3 F_IBL = fresnelSchlickRoughness(F0, NdotV, DataIn.roughness);
+
+    // 2. Cálculo do Specular IBL (com a LUT Analítica / integratebrdf)
     vec3 R = reflect(-V, N);
-    R.y = -R.y;
+    R.y = -R.y; 
     const float MAX_REFLECTION_LOD = 5.0;
     vec3 prefilteredColor = textureLod(environmentMap, R, DataIn.roughness * MAX_REFLECTION_LOD).rgb;
+    
+    vec2 envBRDF = integratebrdf(NdotV, DataIn.roughness);
+    vec3 specularIBL = prefilteredColor * (F_IBL * envBRDF.x + envBRDF.y);
 
-    // Multiplicamos o reflexo pela componente especular de Fresnel
-    vec3 specularIBL = prefilteredColor * ks_env;
-
-    float NdotV   = max(dot(N, V), 0.0);
-    vec3  ks_diff = fresnelSchlickRoughness(F0, NdotV, DataIn.roughness);
-    vec3  kd_env  = vec3(1.0) - ks_diff;
-
-    // Usamos o textureLod com um valor alto (5.0) para amostrar uma versão muito desfocada do Cubemap
+    // 3. Cálculo do Diffuse IBL (com conservação de energia correta)
+    vec3 kS_IBL = F_IBL; // O Fresnel determina quanta luz é refletida
+    vec3 kD_IBL = 1.0 - kS_IBL; // O resto é refratado/difuso
+    
     vec3 irradiance = textureLod(environmentMap, N, 5.0).rgb;
-    vec3 diffuseIBL = kd_env * irradiance * DataIn.albedoMesh;
+    // Multiplicamos por kD_IBL aqui...
+    vec3 diffuseIBL = kD_IBL * irradiance * DataIn.albedoMesh;
 
+    // 4. Luz Ambiente Final
+    // ... Logo, já não precisamos de multiplicar aqui de novo!
     vec3 ambientLight = diffuseIBL + specularIBL;
+
     vec3 outgoingLight = DataIn.emissivityMesh + ambientLight + directLight;
 
     return outgoingLight;
