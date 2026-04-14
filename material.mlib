@@ -19,7 +19,9 @@
     </textures>
 
     <shaders>
-        <shader name="BRDF" vs="shaders/brdf.vert" ps="shaders/brdf.frag" />
+        <shader name="Cook-Torrrance_BRDF" vs="shaders/cook_torrance.vert" ps="shaders/cook_torrance.frag" />
+        <shader name="Cook-Torrance_Modern_BRDF" vs="shaders/cook_torrance_modern.vert" ps="shaders/cook_torrance_modern.frag" />
+        <shader name="BRDF_models" vs="shaders/BRDF_models.vert" ps="shaders/BRDF_models.frag" />
         <shader name="SkyBox" vs="shaders/skybox.vert" ps="shaders/skybox.frag" />
     </shaders>
 
@@ -31,8 +33,8 @@
     </states>
 
     <materials>
-        <material name="MatBRDF">
-            <shader name="BRDF">
+        <material name="Cook-Torrance">
+            <shader name="Cook-Torrrance_BRDF">
                 <values>
                     <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL" />
                     <valueof uniform="m_view" type="RENDERER" component="VIEW" />
@@ -40,19 +42,15 @@
                     <valueof uniform="m_normal" type="RENDERER" component="NORMAL" />
                     
                     <valueof uniform="camPos" type="CAMERA" context="CURRENT" component="POSITION" />
-                    <valueof uniform="lightDir" type="LIGHT" context="Sun" component="DIRECTION" />
+                    <!--valueof uniform="lightDir" type="LIGHT" context="Sun" component="DIRECTION" /-->
+                    <valueof uniform="lightPos" type="LIGHT" context="Sun" component="POSITION"/>
                     <valueof uniform="lightColorUniform" type="LIGHT" context="Sun" component="COLOR" />
                     
-                    <valueof uniform="pbr_albedo"        type="RENDERER" component="albedo" />
-                    <valueof uniform="pbr_emissivity"    type="RENDERER" component="emissivity" />
-                    <valueof uniform="pbr_roughness"     type="RENDERER" component="roughness" />
-                    <valueof uniform="pbr_baseflectance" type="RENDERER" component="baseflect" />
-
-                    <valueof uniform="pbr_metallic"       type="RENDERER" context="CURRENT" component="metallic" />
-                    <valueof uniform="pbr_sheen"          type="RENDERER" context="CURRENT" component="sheen" />
-                    <valueof uniform="pbr_clearcoat"      type="RENDERER" context="CURRENT" component="clearcoat" />
-                    <valueof uniform="pbr_clearcoatGloss" type="RENDERER" context="CURRENT" component="clearcoatGloss" />
-                    <valueof uniform="pbr_subsurface"     type="RENDERER" context="CURRENT" component="subsurface" />
+                    <valueof uniform="albedo" type="RENDERER" component="albedo" />
+                    <valueof uniform="emissivity" type="RENDERER" component="emissivity" />
+                    <valueof uniform="roughness" type="RENDERER" component="roughness" />
+                    <valueof uniform="baseflectance" type="RENDERER" component="baseflectance" />
+                    <valueof uniform="specularWeight" type="RENDERER" component="specularWeight" />
 
                     <valueof uniform="environmentMap" type="TEXTURE_BINDING" component="UNIT" id="0" />
                 </values>
@@ -67,6 +65,72 @@
             </textures>
         </material>
 
+        <material name="Cook-Torrance_Modern">
+            <shader name="Cook-Torrance_Modern_BRDF">
+                <values>
+                    <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL" />
+                    <valueof uniform="m_view" type="RENDERER" component="VIEW" />
+                    <valueof uniform="m_model" type="RENDERER" component="MODEL" />
+                    <valueof uniform="m_normal" type="RENDERER" component="NORMAL" />
+                    
+                    <valueof uniform="camPos" type="CAMERA" context="CURRENT" component="POSITION" />
+                    <valueof uniform="lightDir" type="LIGHT" context="Sun" component="DIRECTION" />
+                    <valueof uniform="lightColorUniform" type="LIGHT" context="Sun" component="COLOR" />
+                    
+                    <valueof uniform="albedo" type="RENDERER" component="albedo" />
+                    <valueof uniform="emissivity" type="RENDERER" component="emissivity" />
+                    <valueof uniform="roughness" type="RENDERER" component="roughness" />
+                    <valueof uniform="baseflectance" type="RENDERER" component="baseflectance" />
+                    <valueof uniform="specularWeight" type="RENDERER" component="specularWeight" />
+
+                    <valueof uniform="environmentMap" type="TEXTURE_BINDING" component="UNIT" id="0" />
+                </values>
+            </shader>
+            <textures>
+                <texture name="CM" UNIT="0">
+                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+            </textures>
+        </material>
+
+        <material name="BRDF_models">
+            <shader name="BRDF_models">
+                <values>
+                    <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL" />
+                    <valueof uniform="m_view" type="RENDERER" component="VIEW" />
+                    <valueof uniform="m_model" type="RENDERER" component="MODEL" />
+                    <valueof uniform="m_normal" type="RENDERER" component="NORMAL" />
+                    
+                    <valueof uniform="camPos" type="CAMERA" context="CURRENT" component="POSITION" />
+                    <valueof uniform="lightDir" type="LIGHT" context="Sun" component="DIRECTION" />
+                    <!--valueof uniform="lightPos" type="LIGHT" context="Sun" component="POSITION"/-->
+                    <valueof uniform="lightColorUniform" type="LIGHT" context="Sun" component="COLOR" />
+                    
+                    <valueof uniform="albedo" type="RENDERER" component="albedo" />
+                    <valueof uniform="emissivity" type="RENDERER" component="emissivity" />
+                    <valueof uniform="roughness" type="RENDERER" component="roughness" />
+                    <valueof uniform="baseflectance" type="RENDERER" component="baseflectance" />
+                    <valueof uniform="specularWeight" type="RENDERER" component="specularWeight" />
+                    <valueof uniform="BRDF_model" type="RENDERER" component="BRDF_model" />
+                    <valueof uniform="IBL" type="RENDERER" component="IBL" />
+
+                    <valueof uniform="environmentMap" type="TEXTURE_BINDING" component="UNIT" id="0" />
+                </values>
+            </shader>
+            <textures>
+                <texture name="CM" UNIT="0">
+                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+            </textures>
+        </material>
+
+                    
         <material name="MatSkybox" >
             <shader name="SkyBox" >
                 <values>

@@ -9,10 +9,11 @@ uniform mat3 m_normal;
 uniform vec3 camPos;
 uniform vec3 lightDir;
 uniform vec3 lightColorUniform;
-uniform vec4 pbr_albedo;
-uniform vec4 pbr_emissivity;
-uniform float pbr_roughness;
-uniform vec4 pbr_baseflectance;
+uniform vec4 albedo;
+uniform vec4 emissivity;
+uniform float roughness;
+uniform float baseflectance;
+uniform float specularWeight;
 
 out Data {
     vec3 fragmentPosition;
@@ -23,7 +24,8 @@ out Data {
     vec3 albedoMesh;
     vec3 emissivityMesh;
     float roughness;
-    vec3 baseflectance;
+    float baseflectance;
+    float specularWeight;
 } DataOut;
 
 void main() {
@@ -39,10 +41,12 @@ void main() {
     DataOut.cameraPosition = camPos;
     DataOut.lightDirection = lightDir;
     DataOut.lightColor = lightColorUniform;
-    DataOut.albedoMesh = pbr_albedo.rgb;
-    DataOut.emissivityMesh = pbr_emissivity.rgb;
-    DataOut.roughness = pbr_roughness * 3;
-    DataOut.baseflectance = pbr_baseflectance.rgb;
+    DataOut.albedoMesh = albedo.rgb;
+    DataOut.emissivityMesh = emissivity.rgb;
+    DataOut.roughness = roughness;
+    DataOut.baseflectance = baseflectance;
+    DataOut.specularWeight = specularWeight;
+
 
     gl_Position = m_pvm * offsetPos;
 }
