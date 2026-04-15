@@ -24,6 +24,24 @@ const float PI = 3.14159265359;
 
 // ==============================================================================
 // ==============================================================================
+//                         FOR IBL PREPROCESSING
+// ==============================================================================
+// ==============================================================================
+
+vec3 fresnelSchlickRoughness(vec3 F0, float cosTheta, float roughness) {
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+vec2 integratebrdf(float NdotV, float roughness) {
+    const vec4 c0 = vec4(-1, -0.0275, -0.572, 0.022);
+    const vec4 c1 = vec4( 1,  0.0425,  1.04, -0.04);
+    vec4  r   = roughness * c0 + c1;
+    float a004 = min(r.x * r.x, exp2(-9.28 * NdotV)) * r.x + r.y;
+    return vec2(-1.04, 1.04) * a004 + r.zw;
+}
+
+// ==============================================================================
+// ==============================================================================
 //                         1. ORIGINAL COOK-TORRANCE
 // ==============================================================================
 // ==============================================================================
@@ -52,7 +70,6 @@ float D_Original(float m, vec3 N, vec3 H) {
     float NdotH2 = NdotH * NdotH;
     float m2 = m * m;
 
-    // Identidade trigonométrica: tan^2(alpha) = (1 - cos^2(alpha)) / cos^2(alpha)
     float tan2Alpha = max(1.0 - NdotH2, 0.0) / max(NdotH2, 0.000001);
 
     float numerator = exp(-tan2Alpha / m2);
@@ -61,12 +78,12 @@ float D_Original(float m, vec3 N, vec3 H) {
     return numerator / denominator;
 }
 
-// Função Geométrica Original de Cook-Torrance (V-Cavities)
+// Geometry Function
 float G_Original(vec3 N, vec3 V, vec3 L, vec3 H) {
     float NdotH = max(dot(N, H), 0.0);
     float NdotV = max(dot(N, V), 0.0);
     float NdotL = max(dot(N, L), 0.0);
-    float VdotH = max(dot(V, H), 0.000001); // Evitar divisão por zero
+    float VdotH = max(dot(V, H), 0.000001);
 
     float masking = (2.0 * NdotH * NdotV) / VdotH;
     float shadowing = (2.0 * NdotH * NdotL) / VdotH;
@@ -143,6 +160,7 @@ vec3 PBR() {
 
     vec3 Rs = vec3(0.0);
     vec3 Rd = DataIn.albedoMesh / PI;
+    vec3 BRDF_direct = vec3(0.0);
 
     // Model selection
     switch (BRDF_model) {
@@ -160,6 +178,11 @@ vec3 PBR() {
             float Rs_den = PI * NdotV * NdotL;
             
             Rs = vec3(Rs_num / max(Rs_den, 0.000001));
+
+            float s = DataIn.specularWeight;
+            float d = 1.0 - s;
+            BRDF_direct = (s * Rs) + (d * Rd);
+
             break;
         }
 
@@ -175,13 +198,11 @@ vec3 PBR() {
             float Rs_den = 4.0 * NdotV * NdotL;
             
             Rs = Rs_num / max(Rs_den, 0.000001);
+
+            BRDF_direct = Rs + Rd;
             break;
         }
     }
-
-    float s = DataIn.specularWeight;
-    float d = 1.0 - s;
-    vec3 BRDF_direct = (s * Rs) + (d * Rd);
 
     vec3 directLight = BRDF_direct * (DataIn.lightColor * PI) * max(dot(L, N), 0.0);
     vec3 ambientLight = vec3(0.0);
@@ -208,6 +229,33 @@ vec3 PBR() {
             vec3 specularIBL = prefilteredColor * ks_env; 
 
             ambientLight = (kd_env * diffuseIBL) + specularIBL;
+            break;
+        }
+
+        case 2: {
+            // --- [NOVO: IBL Avançado (Split-Sum Approximation)] ---
+            float NdotV_IBL = max(dot(N, V), 0.0);
+            
+            // Fresnel que diminui com a rugosidade
+            vec3 ks_env = fresnelSchlickRoughness(F0, NdotV_IBL, DataIn.roughness);
+            vec3 kd_env = vec3(1.0) - ks_env;
+
+            // Irradiância Difusa
+            vec3 irradiance = textureLod(environmentMap, N, 5.0).rgb;
+            vec3 diffuseIBL = kd_env * irradiance * DataIn.albedoMesh;
+
+            // Specular IBL com a LUT analítica (integratebrdf)
+            vec3 R = reflect(-V, N);
+            vec3 sampleR = vec3(R.x, -R.y, R.z);
+            const float MAX_REFLECTION_LOD = 5.0;
+            
+            vec3 prefilteredColor = textureLod(environmentMap, sampleR, alpha * MAX_REFLECTION_LOD).rgb;
+            vec2 envBRDF = integratebrdf(NdotV_IBL, DataIn.roughness);
+            
+            // A fórmula mágica que vês no projeto Disney
+            vec3 specularIBL = prefilteredColor * (ks_env * envBRDF.x + envBRDF.y);
+            
+            ambientLight = diffuseIBL + specularIBL;
             break;
         }
     }
