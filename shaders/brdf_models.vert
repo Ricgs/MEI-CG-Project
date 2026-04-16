@@ -37,13 +37,15 @@ void main() {
     vec4 posEye = m_view * m_model * offsetPos;
 
     DataOut.fragmentPosition = vec3(m_model * offsetPos);
-    DataOut.normal = normalize(mat3(m_model) * normal);
+    DataOut.normal = normalize(m_normal * normal);
+    //DataOut.normal = normalize(mat3(m_model) * normal);
     DataOut.cameraPosition = camPos;
     DataOut.lightDirection = lightDir;
     DataOut.lightColor = lightColorUniform;
     DataOut.albedoMesh = albedo.rgb;
     DataOut.emissivityMesh = emissivity.rgb;
-    DataOut.roughness = roughness * 2;
+    DataOut.roughness = roughness;
+    //DataOut.roughness = roughness * 2;
     DataOut.baseflectance = baseflectance;
     DataOut.specularWeight = specularWeight;
 

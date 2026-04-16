@@ -24,7 +24,7 @@ const float PI = 3.14159265359;
 
 // ==============================================================================
 // ==============================================================================
-//                         FOR IBL PREPROCESSING
+//                         FOR IBL
 // ==============================================================================
 // ==============================================================================
 
@@ -147,7 +147,7 @@ vec3 PBR() {
     // Main vectors
     vec3 N = normalize(DataIn.normal);
     vec3 V = normalize(DataIn.cameraPosition - DataIn.fragmentPosition);
-    vec3 L = normalize(DataIn.lightDirection);
+    vec3 L = normalize(-DataIn.lightDirection);
     vec3 H = normalize(V + L);
 
     float tweakedRoughness = DataIn.roughness * DataIn.roughness;
@@ -233,18 +233,14 @@ vec3 PBR() {
         }
 
         case 2: {
-            // --- [NOVO: IBL Avançado (Split-Sum Approximation)] ---
             float NdotV_IBL = max(dot(N, V), 0.0);
             
-            // Fresnel que diminui com a rugosidade
             vec3 ks_env = fresnelSchlickRoughness(F0, NdotV_IBL, DataIn.roughness);
             vec3 kd_env = vec3(1.0) - ks_env;
 
-            // Irradiância Difusa
             vec3 irradiance = textureLod(environmentMap, N, 5.0).rgb;
             vec3 diffuseIBL = kd_env * irradiance * DataIn.albedoMesh;
 
-            // Specular IBL com a LUT analítica (integratebrdf)
             vec3 R = reflect(-V, N);
             vec3 sampleR = vec3(R.x, -R.y, R.z);
             const float MAX_REFLECTION_LOD = 5.0;
@@ -252,7 +248,6 @@ vec3 PBR() {
             vec3 prefilteredColor = textureLod(environmentMap, sampleR, alpha * MAX_REFLECTION_LOD).rgb;
             vec2 envBRDF = integratebrdf(NdotV_IBL, DataIn.roughness);
             
-            // A fórmula mágica que vês no projeto Disney
             vec3 specularIBL = prefilteredColor * (ks_env * envBRDF.x + envBRDF.y);
             
             ambientLight = diffuseIBL + specularIBL;

@@ -96,7 +96,7 @@
             <var label="BRDF Model" type="RENDERER" context="CURRENT" component="BRDF_model" />
             <var label="IBL" type="RENDERER" context="CURRENT" component="IBL" />
 
-            <var label="Sun Color" type="LIGHT" context="Sun" component="COLOR" mode="COLOR" def="min=-50.0 max=50.0"/>
+            <var label="Sun Color" type="LIGHT" context="Sun" component="COLOR" mode="COLOR" def="min=-100.0 max=100.0"/>
             <var label="Sun Direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-50.0 max=50.0"/>
 
             <var label="Albedo" type="RENDERER" context="CURRENT" component="albedo" mode="COLOR" />
