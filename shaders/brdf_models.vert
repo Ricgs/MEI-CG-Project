@@ -2,52 +2,38 @@
 
 in vec4 position;
 in vec3 normal;
+in vec2 texCoord0;
 
 uniform mat4 m_pvm, m_view, m_model;
 uniform mat3 m_normal;
 
-uniform vec3 camPos;
-uniform vec3 lightDir;
-uniform vec3 lightColorUniform;
-uniform vec4 albedo;
-uniform vec4 emissivity;
-uniform float roughness;
-uniform float baseflectance;
-uniform float specularWeight;
-
 out Data {
-    vec3 fragmentPosition;
-    vec3 normal;
-    vec3 cameraPosition;
-    vec3 lightDirection;
-    vec3 lightColor;
-    vec3 albedoMesh;
-    vec3 emissivityMesh;
-    float roughness;
-    float baseflectance;
-    float specularWeight;
+    vec3 Pos;
+    vec3 Normal;
+    float Metallic;
+    float Roughness;
+    vec2 TexCoords;
 } DataOut;
 
 void main() {
     
-    vec4 offsetPos = position;
-    float espacamento = 3.0; 
-    offsetPos.x += (float(gl_InstanceID) - 2.0) * espacamento;
+    int row = gl_InstanceID / 7;
+    int col = gl_InstanceID % 7;
 
-    vec4 posEye = m_view * m_model * offsetPos;
+    float spacing = 2.5;
 
-    DataOut.fragmentPosition = vec3(m_model * offsetPos);
-    DataOut.normal = normalize(m_normal * normal);
-    //DataOut.normal = normalize(mat3(m_model) * normal);
-    DataOut.cameraPosition = camPos;
-    DataOut.lightDirection = lightDir;
-    DataOut.lightColor = lightColorUniform;
-    DataOut.albedoMesh = albedo.rgb;
-    DataOut.emissivityMesh = emissivity.rgb;
-    DataOut.roughness = roughness;
-    //DataOut.roughness = roughness * 2;
-    DataOut.baseflectance = baseflectance;
-    DataOut.specularWeight = specularWeight;
+    vec3 offset = vec3(
+        (float(col) - 3.0) * spacing, 
+        (float(row) - 3.0) * spacing, 
+        0.0
+    );
 
-    gl_Position = m_pvm * offsetPos;
+    vec4 localPos = position + vec4(offset, 0.0);
+    DataOut.Pos = vec3(m_model * localPos);
+    DataOut.Normal = transpose(inverse(mat3(m_model))) * normal;
+    DataOut.Metallic = float(row) / 6.0;
+    DataOut.Roughness = clamp(float(col) / 6.0, 0.05, 1.0);
+    DataOut.TexCoords = texCoord0;
+
+    gl_Position = m_pvm * localPos;
 }

@@ -5,9 +5,10 @@
         <attributes>
             <attribute type="RENDERER" name="albedo" data="VEC4" x="1.0" y="0.0" z="0.0" />
             <attribute type="RENDERER" name="emissivity" data="VEC4" x="0.0" y="0.0" z="0.0" />
-            <attribute type="RENDERER" name="baseflectance" data="FLOAT" value="0.04" /> 
+            <attribute type="RENDERER" name="baseReflectance" data="FLOAT" value="0.04" /> 
             <attribute type="RENDERER" name="roughness" data="FLOAT" value="0.3" />
             <attribute type="RENDERER" name="specularWeight" data="FLOAT" value="0.5" />
+            <attribute type="RENDERER" name="metallic" data="FLOAT" value="0" />
             <attribute type="RENDERER" name="BRDF_model" data="INT" value="0"/>
             <attribute type="RENDERER" name="IBL" data="INT" value="0"/>
         </attributes>
@@ -16,16 +17,19 @@
             <camera name="MainCamera">
                 <viewport name="MainViewport" />
                 <TYPE value="PERSPECTIVE" />
+                <FOV value="60" />
                 <NEAR value="0.01" />
-                <POSITION x="0.586" y="5.036" z="-10.636" />
+                <FAR value="1000" />
+                <POSITION x="0.0" y="1.0" z="18.0" />
                 <VIEW x="0.0" y="0.0" z="-1.0" />
-                <LOOK_AT_POINT x="0.0" y="1.0" z="0.0" />
+                <LOOK_AT_POINT x="0.0" y="1.0" z="17.0" />
+                <UP x="0.0" y="1.0" z="0.0" />
             </camera>
         </cameras>
 
         <viewports>
             <viewport name="MainViewport" >
-                <CLEAR_COLOR x="0.0" y="0.0" z="0.0" /> 
+                <CLEAR_COLOR r="0.15" g="0.15" b="0.15" /> 
             </viewport>
         </viewports>
 
@@ -33,6 +37,22 @@
             <light name="Sun">
                 <DIRECTION x="-0.5" y="-1.0" z="50.0" />
                 <COLOR r="1.0" g="1.0" b="1.0" />
+            </light>
+            <light name="Light1">
+                <POSITION x="-4.0" y="4.0" z="10.0" w="1.0" />
+                <COLOR r="300.0" g="300.0" b="300.0" />
+            </light>
+            <light name="Light2">
+                <POSITION x="4.0" y="4.0" z="10.0" w="1.0" />
+                <COLOR r="300.0" g="300.0" b="300.0" />
+            </light>
+            <light name="Light3">
+                <POSITION x="-4.0" y="-4.0" z="10.0" w="1.0" />
+                <COLOR r="300.0" g="300.0" b="300.0" />
+            </light>
+            <light name="Light4">
+                <POSITION x="4.0" y="-4.0" z="10.0" w="1.0" />
+                <COLOR r="300.0" g="300.0" b="300.0" />
             </light>
         </lights>
 
@@ -43,7 +63,7 @@
             </scene>
             <scene name="SkyBox" >
                 <geometry name="skyBox" material="skybox" type="BOX" >
-                    <SCALE x="10" y="10" z="10" />
+                    <SCALE x="1000" y="1000" z="1000" />
                 </geometry>
             </scene>
         </scenes>
@@ -56,7 +76,7 @@
     <pipelines>
         <pipeline name="FixedPipeline" default="true">
 
-            <pass class="default" name="SkyBox">
+            <!--pass class="default" name="SkyBox">
                 <COLOR_CLEAR value="false" />
 
                 <scenes>
@@ -68,19 +88,22 @@
                 <materialMaps>
                     <map fromMaterial="*" toLibrary="MyLib" toMaterial="MatSkybox" />
                 </materialMaps>
-            </pass>
+            </pass-->
 
             <pass class="default" name="Spheres">
-                <COLOR_CLEAR value="false" />
+                <COLOR_CLEAR value="true" />
 
-                <scenes instances="1">
+                <scenes instances="49">
                     <scene name="Sphere" />
                 </scenes>
 
                 <camera name="MainCamera" />
 
                 <lights>
-                    <light name="Sun" />
+                    <light name="Light1" />
+                    <light name="Light2" />
+                    <light name="Light3" />
+                    <light name="Light4" />
                 </lights>
 
                 <materialMaps>
@@ -93,17 +116,24 @@
 
     <interface>
         <window label="BRDF Parameters">
-            <var label="BRDF Model" type="RENDERER" context="CURRENT" component="BRDF_model" />
-            <var label="IBL" type="RENDERER" context="CURRENT" component="IBL" />
+            <var label="BRDF Model" type="RENDERER" context="CURRENT" component="BRDF_model" strings="Original Cook-Torrance,Modern GGX" />
+            <var label="IBL" type="RENDERER" context="CURRENT" component="IBL" strings="Disabled,Enabled,v2" />
 
-            <var label="Sun Color" type="LIGHT" context="Sun" component="COLOR" mode="COLOR" def="min=-100.0 max=100.0"/>
-            <var label="Sun Direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-50.0 max=50.0"/>
+            <var label="Light 1 Color" type="LIGHT" context="Light1" component="COLOR" />
+            <var label="Light 1 Position" type="LIGHT" context="Light1" component="POSITION" def="min=-50.0 max=50.0" />
+            <var label="Light 2 Color" type="LIGHT" context="Light2" component="COLOR" />
+            <var label="Light 2 Position" type="LIGHT" context="Light2" component="POSITION" def="min=-50.0 max=50.0" />
+            <var label="Light 3 Color" type="LIGHT" context="Light3" component="COLOR" />
+            <var label="Light 3 Position" type="LIGHT" context="Light3" component="POSITION" def="min=-50.0 max=50.0" />
+            <var label="Light 4 Color" type="LIGHT" context="Light4" component="COLOR" />
+            <var label="Light 4 Position" type="LIGHT" context="Light4" component="POSITION" def="min=-50.0 max=50.0" />
 
             <var label="Albedo" type="RENDERER" context="CURRENT" component="albedo" mode="COLOR" />
             <var label="Emissivity" type="RENDERER" context="CURRENT" component="emissivity" mode="COLOR" />
-            <var label="Base Reflectance" type="RENDERER" context="CURRENT" component="baseflectance" def="min=0.0 max=1.0"/>
+            <var label="Base Reflectance" type="RENDERER" context="CURRENT" component="baseReflectance" def="min=0.0 max=1.0"/>
             <var label="Roughness" type="RENDERER" context="CURRENT" component="roughness" def="min=0.01 max=1.0" />
             <var label="Specular Weight" type="RENDERER" context="CURRENT" component="specularWeight" def="min=0.0 max=1.0" />
+            <var label="Metallic" type="RENDERER" context="CURRENT" component="metallic" def="min=0.0 max=1.0" />
         </window>
     </interface>
 </project>

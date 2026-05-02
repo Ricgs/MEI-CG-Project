@@ -41,15 +41,21 @@
                     <valueof uniform="m_normal" type="RENDERER" component="NORMAL" />
                     
                     <valueof uniform="camPos" type="CAMERA" context="CURRENT" component="POSITION" />
-                    <valueof uniform="lightDir" type="LIGHT" context="Sun" component="DIRECTION" />
-                    <!--valueof uniform="lightPos" type="LIGHT" context="Sun" component="POSITION"/-->
-                    <valueof uniform="lightColorUniform" type="LIGHT" context="Sun" component="COLOR" />
+                    <valueof uniform="lightPositions[0]" type="LIGHT" context="Light1" component="POSITION" />
+                    <valueof uniform="lightColors[0]" type="LIGHT" context="Light1" component="COLOR" />
+                    <valueof uniform="lightPositions[1]" type="LIGHT" context="Light2" component="POSITION" />
+                    <valueof uniform="lightColors[1]" type="LIGHT" context="Light2" component="COLOR" />
+                    <valueof uniform="lightPositions[2]" type="LIGHT" context="Light3" component="POSITION" />
+                    <valueof uniform="lightColors[2]" type="LIGHT" context="Light3" component="COLOR" />
+                    <valueof uniform="lightPositions[3]" type="LIGHT" context="Light4" component="POSITION" />
+                    <valueof uniform="lightColors[3]" type="LIGHT" context="Light4" component="COLOR" />
                     
                     <valueof uniform="albedo" type="RENDERER" component="albedo" />
                     <valueof uniform="emissivity" type="RENDERER" component="emissivity" />
                     <valueof uniform="roughness" type="RENDERER" component="roughness" />
-                    <valueof uniform="baseflectance" type="RENDERER" component="baseflectance" />
+                    <valueof uniform="baseReflectance" type="RENDERER" component="baseReflectance" />
                     <valueof uniform="specularWeight" type="RENDERER" component="specularWeight" />
+                    <valueof uniform="metallic" type="RENDERER" component="metallic" />
                     <valueof uniform="BRDF_model" type="RENDERER" component="BRDF_model" />
                     <valueof uniform="IBL" type="RENDERER" component="IBL" />
 

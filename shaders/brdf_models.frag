@@ -1,20 +1,24 @@
 #version 460
 
 in Data {
-    vec3 fragmentPosition;
-    vec3 normal;
-    vec3 cameraPosition;
-    vec3 lightDirection;
-    vec3 lightColor;
-    vec3 albedoMesh;
-    vec3 emissivityMesh;
-    float roughness;
-    float baseflectance;
-    float specularWeight;
+    vec3 Pos;
+    vec3 Normal;
+    float Metallic;
+    float Roughness;
+    vec2 TexCoords;
 } DataIn;
 
 uniform int BRDF_model;
 uniform int IBL;
+
+uniform vec4 camPos;
+uniform vec4 lightPositions[4];
+uniform vec4 lightColors[4];
+uniform vec4 albedo;
+uniform vec4 emissivity;
+uniform float baseReflectance;
+uniform float specularWeight;
+uniform float ao;
 
 uniform samplerCube environmentMap;
 
@@ -68,14 +72,14 @@ float F_Original(float n, vec3 V, vec3 H) {
 float D_Original(float m, vec3 N, vec3 H) {
     float NdotH = clamp(dot(N, H), 0.000001, 1.0);
     float NdotH2 = NdotH * NdotH;
-    float m2 = m * m;
+    float m2 = max(m * m, 0.000001);
 
     float tan2Alpha = max(1.0 - NdotH2, 0.0) / max(NdotH2, 0.000001);
 
     float numerator = exp(-tan2Alpha / m2);
     float denominator = m2 * NdotH2 * NdotH2;
 
-    return numerator / denominator;
+    return numerator / max(denominator, 0.000001);
 }
 
 // Geometry Function
@@ -105,7 +109,7 @@ vec3 F_Modern(float cosTheta, vec3 F0) {
 // Trowbridge-Reitz GGX Normal Distribution Function
 float D_Modern(float roughness, vec3 N, vec3 H) {
     float a = roughness * roughness;
-    float a2 = a * a;
+    float a2 = max(a * a, 0.000001);
     float NdotH = max(dot(N, H), 0.0);
     float NdotH2 = NdotH * NdotH;
 
@@ -118,13 +122,12 @@ float D_Modern(float roughness, vec3 N, vec3 H) {
 
 // Schlick-GGX Geometry Function
 float GeometrySchlickGGX(float NdotV, float roughness) {
-    // Para luzes diretas, mapeia-se o K assim:
     float r = (roughness + 1.0);
     float k = (r * r) / 8.0;
 
     float num = NdotV;
     float denom = NdotV * (1.0 - k) + k;
-    return num / denom;
+    return num / max(denom, 0.000001);
 }
 
 // Smith Geometry Function
@@ -144,129 +147,90 @@ float G_Modern(vec3 N, vec3 V, vec3 L, float roughness) {
 
 vec3 PBR() {
 
-    // Main vectors
-    vec3 N = normalize(DataIn.normal);
-    vec3 V = normalize(DataIn.cameraPosition - DataIn.fragmentPosition);
-    vec3 L = normalize(-DataIn.lightDirection);
-    vec3 H = normalize(V + L);
+    vec3 N = normalize(DataIn.Normal);
+    vec3 V = normalize(camPos.xyz - DataIn.Pos);
 
-    float tweakedRoughness = DataIn.roughness * DataIn.roughness;
-    float alpha = max(tweakedRoughness, 0.01);
-    float F0_val = DataIn.baseflectance;
-    vec3 F0 = vec3(F0_val);
+    float NdotV = max(dot(N, V), 0.0001);
+
+
+    float roughness = DataIn.Roughness;
+    float Metallic = DataIn.Metallic;
+
+    float F0_val = max(baseReflectance, 0.04);
+    vec3 F0 = mix(vec3(F0_val), albedo.rgb, Metallic);
+
+    float f0_mean = clamp((F0.x + F0.y + F0.z) / 3.0, 0.001, 0.99);
+    float n = (1.0 + sqrt(f0_mean)) / (1.0 - sqrt(f0_mean));
+
+    vec3 Lo = vec3(0.0);
+    for (int i = 0; i < 4; i++) {
+        vec3 L = normalize(lightPositions[i].xyz - DataIn.Pos);
+        float NdotL_real = dot(N, L);
+        if (NdotL_real <= 0.0) {
+            continue; // Ignora esta luz para este pixel
+        }
+        vec3 H = normalize(V + L);
+
+        float NdotL = clamp(NdotL_real, 0.001, 1.0);
+        float NdotH = clamp(dot(N, H), 0.001, 1.0);
+        float VdotH = clamp(dot(V, H), 0.001, 1.0);
+
+        float distance = length(lightPositions[i].xyz - DataIn.Pos);
+        float attenuation = 1.0 / (distance * distance);
+        vec3 radiance = lightColors[i].rgb * attenuation;
+
+        float NDF;
+        float G;
+        vec3 F;
+        vec3 specular;
+
+        switch (BRDF_model) {
+            case 0: {
+                NDF = D_Original(roughness, N, H);
+                G = G_Original(N, V, L, H);
+                float f_orig = F_Original(n, V, H); 
+                F = vec3(f_orig);
+
+                vec3 numerator = NDF * G * F;
+                float denominator = PI * max(NdotV, 0.0) * max(NdotL, 0.0) + 0.0001;
+                specular = numerator / denominator;
+                break;
+            }
+            case 1: {
+                NDF = D_Modern(roughness, N, H);
+                G = G_Modern(N, V, L, roughness);
+                F = F_Modern(max(VdotH, 0.0), F0);
+
+                vec3 numerator = NDF * G * F;
+                float denominator = 4.0 * max(NdotV, 0.0) * max(NdotL, 0.0) + 0.0001;
+                specular = numerator / denominator;
+                break;
+            }
+        }
+
+        vec3 kS = F;
+        vec3 kD = max(vec3(1.0) - kS, vec3(0.0));
+        kD *= 1.0 - Metallic;
+
+        Lo += (kD * albedo.rgb / PI + specular) * radiance * NdotL;
+    }
+    float ao = 1.0;
+    vec3 ambient = vec3(0.03) * albedo.rgb * ao;
+    vec3 color = Lo + ambient;
     
-    float NdotV = max(dot(N, V), 0.001);
-    float NdotL = max(dot(N, L), 0.001);
-
-    vec3 Rs = vec3(0.0);
-    vec3 Rd = DataIn.albedoMesh / PI;
-    vec3 BRDF_direct = vec3(0.0);
-
-    // Model selection
-    switch (BRDF_model) {
-        case 0: {
-            // --------------------------------------------------
-            // ORIGINAL COOK-TORRANCE
-            // --------------------------------------------------
-            float n_derived = (1.0 + sqrt(F0_val)) / max((1.0 - sqrt(F0_val)), 0.0001);
-
-            float D_val = D_Original(alpha, N, H);
-            float G_val = G_Original(N, V, L, H);
-            float F_val = F_Original(n_derived, V, H);
-
-            float Rs_num = D_val * G_val * F_val;
-            float Rs_den = PI * NdotV * NdotL;
-            
-            Rs = vec3(Rs_num / max(Rs_den, 0.000001));
-
-            float s = DataIn.specularWeight;
-            float d = 1.0 - s;
-            BRDF_direct = (s * Rs) + (d * Rd);
-
-            break;
-        }
-
-        case 1: {
-            // --------------------------------------------------
-            // MODERN COOK-TORRANCE (GGX + SCHLICK)
-            // --------------------------------------------------
-            float D_val = D_Modern(alpha, N, H);
-            float G_val = G_Modern(N, V, L, alpha);
-            vec3 F_val = F_Modern(max(dot(H, V), 0.0), F0);
-
-            vec3 Rs_num = D_val * G_val * F_val;
-            float Rs_den = 4.0 * NdotV * NdotL;
-            
-            Rs = Rs_num / max(Rs_den, 0.000001);
-
-            BRDF_direct = Rs + Rd;
-            break;
-        }
-    }
-
-    vec3 directLight = BRDF_direct * (DataIn.lightColor * PI) * max(dot(L, N), 0.0);
-    vec3 ambientLight = vec3(0.0);
-
-    switch (IBL) {
-        case 0:
-            ambientLight = DataIn.albedoMesh * 0.1; 
-            break;
-
-        case 1: {
-            vec3 ks_env = F_Modern(max(dot(N, V), 0.0), F0);
-            vec3 kd_env = vec3(1.0) - ks_env;
-
-            vec3 sampleN = vec3(-N.x, -N.y, N.z);
-            vec3 irradiance = textureLod(environmentMap, sampleN, 5.0).rgb;
-            vec3 diffuseIBL = irradiance * DataIn.albedoMesh;
-
-            vec3 R = reflect(-V, N); 
-            vec3 sampleR = vec3(-R.x, -R.y, R.z);
-            const float MAX_REFLECTION_LOD = 5.0; 
-            
-            vec3 prefilteredColor = textureLod(environmentMap, sampleR, alpha * MAX_REFLECTION_LOD).rgb;
-            
-            vec3 specularIBL = prefilteredColor * ks_env; 
-
-            ambientLight = (kd_env * diffuseIBL) + specularIBL;
-            break;
-        }
-
-        case 2: {
-            float NdotV_IBL = max(dot(N, V), 0.0);
-            
-            vec3 ks_env = fresnelSchlickRoughness(F0, NdotV_IBL, DataIn.roughness);
-            vec3 kd_env = vec3(1.0) - ks_env;
-
-            vec3 irradiance = textureLod(environmentMap, N, 5.0).rgb;
-            vec3 diffuseIBL = kd_env * irradiance * DataIn.albedoMesh;
-
-            vec3 R = reflect(-V, N);
-            vec3 sampleR = vec3(R.x, -R.y, R.z);
-            const float MAX_REFLECTION_LOD = 5.0;
-            
-            vec3 prefilteredColor = textureLod(environmentMap, sampleR, alpha * MAX_REFLECTION_LOD).rgb;
-            vec2 envBRDF = integratebrdf(NdotV_IBL, DataIn.roughness);
-            
-            vec3 specularIBL = prefilteredColor * (ks_env * envBRDF.x + envBRDF.y);
-            
-            ambientLight = diffuseIBL + specularIBL;
-            break;
-        }
-    }
-
-    vec3 outgoingLight = DataIn.emissivityMesh + directLight + ambientLight;
-
-    return outgoingLight;
+    return color;
 }
 
 // ==============================================================================
 
 void main() {
 
-    vec3 debugNormal = normalize(DataIn.normal) * 0.5 + 0.5;
+    vec3 debugNormal = normalize(DataIn.Normal) * 0.5 + 0.5;
     
     outputColor = vec4(debugNormal, 1.0);
     
-    outputColor = vec4(PBR(), 1.0);
+    vec3 color = PBR();
+    color = color / (color + vec3(1.0));
+    color = pow(color, vec3(1.0/2.2));
+    outputColor = vec4(color, 1.0);
 }
