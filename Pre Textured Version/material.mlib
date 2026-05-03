@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<materialLib name="MyLib">
+
+    <shaders>
+        <shader name="BRDF_models" vs="shaders/BRDF_models.vert" ps="shaders/BRDF_models.frag" />
+    </shaders>
+
+    <materials>
+
+        <material name="BRDF_models">
+            <shader name="BRDF_models">
+                <values>
+                    <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL" />
+                    <valueof uniform="m_view" type="RENDERER" component="VIEW" />
+                    <valueof uniform="m_model" type="RENDERER" component="MODEL" />
+                    <valueof uniform="m_normal" type="RENDERER" component="NORMAL" />
+                    
+                    <valueof uniform="camPos" type="CAMERA" context="CURRENT" component="POSITION" />
+                    <valueof uniform="lightPositions[0]" type="LIGHT" context="Light1" component="POSITION" />
+                    <valueof uniform="lightPos0" type="LIGHT" context="Light1" component="POSITION" />
+                    <valueof uniform="lightCol0" type="LIGHT" context="Light1" component="COLOR" />
+                    <valueof uniform="lightPos1" type="LIGHT" context="Light2" component="POSITION" />
+                    <valueof uniform="lightCol1" type="LIGHT" context="Light2" component="COLOR" />
+                    <valueof uniform="lightPos2" type="LIGHT" context="Light3" component="POSITION" />
+                    <valueof uniform="lightCol2" type="LIGHT" context="Light3" component="COLOR" />
+                    <valueof uniform="lightPos3" type="LIGHT" context="Light4" component="POSITION" />
+                    <valueof uniform="lightCol3" type="LIGHT" context="Light4" component="COLOR" />
+                    
+                    <valueof uniform="albedo" type="RENDERER" component="albedo" />
+                    <valueof uniform="baseReflectance" type="RENDERER" component="baseReflectance" />
+                    <valueof uniform="BRDF_model" type="RENDERER" component="BRDF_model" />
+                </values>
+            </shader>
+        </material>
+    </materials>
+</materialLib>
