@@ -2,7 +2,6 @@
 
 in vec4 position;
 in vec3 normal;
-in vec3 tangent;
 in vec2 texCoord0;
 
 uniform mat4 m_pvm, m_view, m_model;
@@ -11,7 +10,6 @@ uniform mat3 m_normal;
 out Data {
     vec3 Pos;
     vec3 Normal;
-    vec3 Tangent;
     vec2 TexCoords;
 } DataOut;
 
@@ -32,7 +30,6 @@ void main() {
     DataOut.Pos = vec3(m_model * localPos);
     mat3 normalMatrix = transpose(inverse(mat3(m_model)));
     DataOut.Normal = normalMatrix * normal;
-    DataOut.Tangent = normalMatrix * tangent;
     DataOut.TexCoords = texCoord0;
 
     gl_Position = m_pvm * localPos;

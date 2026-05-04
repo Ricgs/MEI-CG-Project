@@ -1,42 +1,16 @@
 <?xml version="1.0" ?>
 <materialLib name="MyLib">
     <textures>
-        <texture name="left" filename="textures/nissibeach_cm/negx.jpg" />
-        <texture name="right" filename="textures/nissibeach_cm/posx.jpg" />
-        <texture name="front" filename="textures/nissibeach_cm/posz.jpg" />
-        <texture name="back" filename="textures/nissibeach_cm/negz.jpg" />
-        <texture name="top" filename="textures/nissibeach_cm/posy.jpg" />
-        <texture name="bottom" filename="textures/nissibeach_cm/negy.jpg" />
-
         <texture name="tex_albedo" filename="textures/pbr/wall/albedo.png" mipmap="true" />
         <texture name="tex_roughness" filename="textures/pbr/wall/roughness.png" mipmap="true" />
         <texture name="tex_metallic" filename="textures/pbr/wall/metallic.png" mipmap="true" />
         <texture name="tex_normal" filename="textures/pbr/wall/normal.png" mipmap="true" />
         <texture name="tex_ao" filename="textures/pbr/wall/ao.png" mipmap="true" />
-
-
-
-        <cubeMap name="CM" mipmap="true" 
-            filePosX="textures/nissibeach_cm/posx.jpg"
-            fileNegX="textures/nissibeach_cm/negx.jpg"
-            filePosY="textures/nissibeach_cm/posy.jpg"
-            fileNegY="textures/nissibeach_cm/negy.jpg"
-            filePosZ="textures/nissibeach_cm/posz.jpg"
-            fileNegZ="textures/nissibeach_cm/negz.jpg"	
-        />
     </textures>
 
     <shaders>
         <shader name="BRDF_models" vs="shaders/BRDF_models.vert" ps="shaders/BRDF_models.frag" />
-        <shader name="SkyBox" vs="shaders/skybox.vert" ps="shaders/skybox.frag" />
     </shaders>
-
-    <states>
-        <state name="Skybox" >
-            <CULL_TYPE value="FRONT" />
-            <DEPTH_MASK value="false" />
-        </state>
-    </states>
 
     <materials>
 
@@ -49,14 +23,14 @@
                     <valueof uniform="m_normal" type="RENDERER" component="NORMAL" />
                     
                     <valueof uniform="camPos" type="CAMERA" context="CURRENT" component="POSITION" />
-                    <valueof uniform="lightPositions[0]" type="LIGHT" context="Light1" component="POSITION" />
-                    <valueof uniform="lightColors[0]" type="LIGHT" context="Light1" component="COLOR" />
-                    <valueof uniform="lightPositions[1]" type="LIGHT" context="Light2" component="POSITION" />
-                    <valueof uniform="lightColors[1]" type="LIGHT" context="Light2" component="COLOR" />
-                    <valueof uniform="lightPositions[2]" type="LIGHT" context="Light3" component="POSITION" />
-                    <valueof uniform="lightColors[2]" type="LIGHT" context="Light3" component="COLOR" />
-                    <valueof uniform="lightPositions[3]" type="LIGHT" context="Light4" component="POSITION" />
-                    <valueof uniform="lightColors[3]" type="LIGHT" context="Light4" component="COLOR" />
+                    <valueof uniform="lightPos0" type="LIGHT" context="Light1" component="POSITION" />
+                    <valueof uniform="lightCol0" type="LIGHT" context="Light1" component="COLOR" />
+                    <valueof uniform="lightPos1" type="LIGHT" context="Light2" component="POSITION" />
+                    <valueof uniform="lightCol1" type="LIGHT" context="Light2" component="COLOR" />
+                    <valueof uniform="lightPos2" type="LIGHT" context="Light3" component="POSITION" />
+                    <valueof uniform="lightCol2" type="LIGHT" context="Light3" component="COLOR" />
+                    <valueof uniform="lightPos3" type="LIGHT" context="Light4" component="POSITION" />
+                    <valueof uniform="lightCol3" type="LIGHT" context="Light4" component="COLOR" />
 
                     <valueof uniform="albedoMap" type="TEXTURE_BINDING" component="UNIT" id="1" />
                     <valueof uniform="roughnessMap" type="TEXTURE_BINDING" component="UNIT" id="2" />
@@ -64,13 +38,7 @@
                     <valueof uniform="normalMap" type="TEXTURE_BINDING" component="UNIT" id="4" />
                     <valueof uniform="aoMap" type="TEXTURE_BINDING" component="UNIT" id="5" />
                     
-                    <valueof uniform="emissivity" type="RENDERER" component="emissivity" />
                     <valueof uniform="baseReflectance" type="RENDERER" component="baseReflectance" />
-                    <valueof uniform="specularWeight" type="RENDERER" component="specularWeight" />
-                    <valueof uniform="BRDF_model" type="RENDERER" component="BRDF_model" />
-                    <valueof uniform="IBL" type="RENDERER" component="IBL" />
-
-                    <valueof uniform="environmentMap" type="TEXTURE_BINDING" component="UNIT" id="0" />
                 </values>
             </shader>
             <textures>
@@ -96,61 +64,7 @@
                     <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
                     <MAG_FILTER value="LINEAR" />
                 </texture>
-
-                <texture name="CM" UNIT="0">
-                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
-                    <MAG_FILTER value="LINEAR" />
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
             </textures>
-        </material>
-
-        <material name="MatSkybox" >
-            <shader name="SkyBox" >
-                <values>
-                    <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL" />
-                    <valueof uniform="cam_pos" type="CAMERA" component="POSITION" />
-                    <valueof uniform="tex_back" type="TEXTURE_BINDING" component="UNIT" id ="0" />
-                    <valueof uniform="tex_left" type="TEXTURE_BINDING" component="UNIT" id ="1" />
-                    <valueof uniform="tex_front" type="TEXTURE_BINDING" component="UNIT" id ="2" />
-                    <valueof uniform="tex_right" type="TEXTURE_BINDING" component="UNIT" id ="3" />
-                    <valueof uniform="tex_top" type="TEXTURE_BINDING" component="UNIT" id ="4" />
-                    <valueof uniform="tex_bottom" type="TEXTURE_BINDING" component="UNIT" id ="5" />
-                    <valueof uniform="tex_cm" type="TEXTURE_BINDING" component="UNIT" id ="6" />
-                </values>
-            </shader>
-            <textures>
-                <texture name="back" UNIT="0" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="left" UNIT="1" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="front" UNIT="2" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="right" UNIT="3" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="top" UNIT="4" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="bottom" UNIT="5" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="CM" UNIT="6" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-            </textures>
-            <state name="Skybox" />
         </material>
     </materials>
 </materialLib>

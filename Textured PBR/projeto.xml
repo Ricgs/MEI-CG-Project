@@ -34,24 +34,20 @@
         </viewports>
 
         <lights>
-            <light name="Sun">
-                <DIRECTION x="-0.5" y="-1.0" z="50.0" />
-                <COLOR r="1.0" g="1.0" b="1.0" />
-            </light>
             <light name="Light1">
-                <POSITION x="-4.0" y="4.0" z="10.0" w="1.0" />
+                <POSITION x="-4.0" y="4.0" z="4.0" w="1.0" />
                 <COLOR r="300.0" g="300.0" b="300.0" />
             </light>
             <light name="Light2">
-                <POSITION x="4.0" y="4.0" z="10.0" w="1.0" />
+                <POSITION x="4.0" y="4.0" z="4.0" w="1.0" />
                 <COLOR r="300.0" g="300.0" b="300.0" />
             </light>
             <light name="Light3">
-                <POSITION x="-4.0" y="-4.0" z="10.0" w="1.0" />
+                <POSITION x="-4.0" y="-4.0" z="4.0" w="1.0" />
                 <COLOR r="300.0" g="300.0" b="300.0" />
             </light>
             <light name="Light4">
-                <POSITION x="4.0" y="-4.0" z="10.0" w="1.0" />
+                <POSITION x="4.0" y="-4.0" z="4.0" w="1.0" />
                 <COLOR r="300.0" g="300.0" b="300.0" />
             </light>
         </lights>
@@ -59,7 +55,6 @@
         <scenes>
             <scene name="Sphere">
                 <TRANSLATE x="0" y="1" z="0" />
-                <!--file name="models/sphere.obj" param="USE_ADJACENCY, CALC_TANGENT"/-->
                 <geometry name="bolas" type="SPHERE" SLICES="64" STACKS="64" />
             </scene>
             <scene name="SkyBox" >
@@ -76,20 +71,6 @@
 
     <pipelines>
         <pipeline name="FixedPipeline" default="true">
-
-            <!--pass class="default" name="SkyBox">
-                <COLOR_CLEAR value="false" />
-
-                <scenes>
-                    <scene name="SkyBox" />
-                </scenes>
-
-                <camera name="MainCamera" />
-
-                <materialMaps>
-                    <map fromMaterial="*" toLibrary="MyLib" toMaterial="MatSkybox" />
-                </materialMaps>
-            </pass-->
 
             <pass class="default" name="Spheres">
                 <COLOR_CLEAR value="true" />
@@ -117,9 +98,6 @@
 
     <interface>
         <window label="BRDF Parameters">
-            <var label="BRDF Model" type="RENDERER" context="CURRENT" component="BRDF_model" strings="Original Cook-Torrance,Modern GGX" />
-            <var label="IBL" type="RENDERER" context="CURRENT" component="IBL" strings="Disabled,Enabled,v2" />
-
             <var label="Light 1 Color" type="LIGHT" context="Light1" component="COLOR" />
             <var label="Light 1 Position" type="LIGHT" context="Light1" component="POSITION" def="min=-50.0 max=50.0" />
             <var label="Light 2 Color" type="LIGHT" context="Light2" component="COLOR" />
@@ -129,12 +107,7 @@
             <var label="Light 4 Color" type="LIGHT" context="Light4" component="COLOR" />
             <var label="Light 4 Position" type="LIGHT" context="Light4" component="POSITION" def="min=-50.0 max=50.0" />
 
-            <var label="Albedo" type="RENDERER" context="CURRENT" component="albedo" mode="COLOR" />
-            <var label="Emissivity" type="RENDERER" context="CURRENT" component="emissivity" mode="COLOR" />
             <var label="Base Reflectance" type="RENDERER" context="CURRENT" component="baseReflectance" def="min=0.0 max=1.0"/>
-            <var label="Roughness" type="RENDERER" context="CURRENT" component="roughness" def="min=0.01 max=1.0" />
-            <var label="Specular Weight" type="RENDERER" context="CURRENT" component="specularWeight" def="min=0.0 max=1.0" />
-            <var label="Metallic" type="RENDERER" context="CURRENT" component="metallic" def="min=0.0 max=1.0" />
         </window>
     </interface>
 </project>

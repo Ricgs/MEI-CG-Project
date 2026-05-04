@@ -3,26 +3,19 @@
 in Data {
     vec3 Pos;
     vec3 Normal;
-    vec3 Tangent;
     vec2 TexCoords;
 } DataIn;
 
-uniform int BRDF_model;
-uniform int IBL;
-
 uniform vec4 camPos;
-uniform vec4 lightPositions[4];
-uniform vec4 lightColors[4];
+uniform vec4 lightPos0, lightPos1, lightPos2, lightPos3;
+uniform vec4 lightCol0, lightCol1, lightCol2, lightCol3;
 uniform sampler2D albedoMap;
 uniform sampler2D normalMap;
 uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 uniform sampler2D aoMap;
-uniform vec4 emissivity;
 uniform float baseReflectance;
-uniform float specularWeight;
 
-uniform samplerCube environmentMap;
 
 out vec4 outputColor;
 
@@ -36,92 +29,19 @@ const float PI = 3.14159265359;
 
 vec3 getNormalFromMap()
 {
-    // Lê o Normal Map (0 a 1) e converte para (-1 a 1)
     vec3 tangentNormal = texture(normalMap, DataIn.TexCoords).xyz * 2.0 - 1.0;
 
-    // Constrói a matriz TBN suavemente
-    vec3 N = normalize(DataIn.Normal);
-    vec3 T = normalize(DataIn.Tangent);
-    
-    // Re-ortogonaliza o T em relação ao N usando o processo Gram-Schmidt
-    T = normalize(T - dot(T, N) * N);
-    
-    // Calcula a Bitangente
-    vec3 B = cross(N, T);
-    
+    vec3 Q1  = dFdx(DataIn.Pos);
+    vec3 Q2  = dFdy(DataIn.Pos);
+    vec2 st1 = dFdx(DataIn.TexCoords);
+    vec2 st2 = dFdy(DataIn.TexCoords);
+
+    vec3 N   = normalize(DataIn.Normal);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
     mat3 TBN = mat3(T, B, N);
 
-    // Retorna a normal final no World Space
     return normalize(TBN * tangentNormal);
-}
-
-// ==============================================================================
-// ==============================================================================
-//                         FOR IBL
-// ==============================================================================
-// ==============================================================================
-
-vec3 fresnelSchlickRoughness(vec3 F0, float cosTheta, float roughness) {
-    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
-}
-
-vec2 integratebrdf(float NdotV, float roughness) {
-    const vec4 c0 = vec4(-1, -0.0275, -0.572, 0.022);
-    const vec4 c1 = vec4( 1,  0.0425,  1.04, -0.04);
-    vec4  r   = roughness * c0 + c1;
-    float a004 = min(r.x * r.x, exp2(-9.28 * NdotV)) * r.x + r.y;
-    return vec2(-1.04, 1.04) * a004 + r.zw;
-}
-
-// ==============================================================================
-// ==============================================================================
-//                         1. ORIGINAL COOK-TORRANCE
-// ==============================================================================
-// ==============================================================================
-
-// Fresnel Function
-float F_Original(float n, vec3 V, vec3 H) {
-    float c = max(dot(V, H), 0.0);
-    float g2 = n * n + c * c - 1.0;
-    float g = sqrt(max(g2, 0.0));
-
-    float gMinusC = g - c;
-    float gPlusC = max(g + c, 0.000001);
-
-    float termo1 = (gMinusC * gMinusC) / (gPlusC * gPlusC);
-
-    float termo2_num = (c * gPlusC - 1.0);
-    float termo2_den = (c * gMinusC + 1.0);
-    float termo2 = 1.0 + (termo2_num * termo2_num) / (termo2_den * termo2_den);
-
-    return 0.5 * termo1 * termo2;
-}
-
-// Beckmann Normal Distribution Function
-float D_Original(float m, vec3 N, vec3 H) {
-    float NdotH = clamp(dot(N, H), 0.000001, 1.0);
-    float NdotH2 = NdotH * NdotH;
-    float m2 = max(m * m, 0.000001);
-
-    float tan2Alpha = max(1.0 - NdotH2, 0.0) / max(NdotH2, 0.000001);
-
-    float numerator = exp(-tan2Alpha / m2);
-    float denominator = m2 * NdotH2 * NdotH2;
-
-    return numerator / max(denominator, 0.000001);
-}
-
-// Geometry Function
-float G_Original(vec3 N, vec3 V, vec3 L, vec3 H) {
-    float NdotH = max(dot(N, H), 0.0);
-    float NdotV = max(dot(N, V), 0.0);
-    float NdotL = max(dot(N, L), 0.0);
-    float VdotH = max(dot(V, H), 0.000001);
-
-    float masking = (2.0 * NdotH * NdotV) / VdotH;
-    float shadowing = (2.0 * NdotH * NdotL) / VdotH;
-
-    return min(1.0, min(masking, shadowing));
 }
 
 // ==============================================================================
@@ -181,7 +101,10 @@ vec3 PBR() {
     float roughness = texture(roughnessMap, DataIn.TexCoords).r;
     float ao        = texture(aoMap, DataIn.TexCoords).r;
 
-    vec3 N = normalize(DataIn.Normal);
+    vec4 lightPositions[4] = vec4[](lightPos0, lightPos1, lightPos2, lightPos3);
+    vec4 lightColors[4]    = vec4[](lightCol0, lightCol1, lightCol2, lightCol3);
+
+    vec3 N = getNormalFromMap();
     vec3 V = normalize(camPos.xyz - DataIn.Pos);
 
     float NdotV = max(dot(N, V), 0.0001);
@@ -209,34 +132,13 @@ vec3 PBR() {
         float attenuation = 1.0 / (distance * distance);
         vec3 radiance = lightColors[i].rgb * attenuation;
 
-        float NDF;
-        float G;
-        vec3 F;
-        vec3 specular;
+        float NDF = D_Modern(roughness, N, H);
+        float G = G_Modern(N, V, L, roughness);
+        vec3 F = F_Modern(max(VdotH, 0.0), F0);
 
-        switch (BRDF_model) {
-            case 0: {
-                NDF = D_Original(roughness, N, H);
-                G = G_Original(N, V, L, H);
-                float f_orig = F_Original(n, V, H); 
-                F = vec3(f_orig);
-
-                vec3 numerator = NDF * G * F;
-                float denominator = PI * max(NdotV, 0.0) * max(NdotL, 0.0) + 0.0001;
-                specular = numerator / denominator;
-                break;
-            }
-            case 1: {
-                NDF = D_Modern(roughness, N, H);
-                G = G_Modern(N, V, L, roughness);
-                F = F_Modern(max(VdotH, 0.0), F0);
-
-                vec3 numerator = NDF * G * F;
-                float denominator = 4.0 * max(NdotV, 0.0) * max(NdotL, 0.0) + 0.0001;
-                specular = numerator / denominator;
-                break;
-            }
-        }
+        vec3 numerator = NDF * G * F;
+        float denominator = 4.0 * max(NdotV, 0.0) * max(NdotL, 0.0) + 0.0001;
+        vec3 specular = numerator / denominator;
 
         vec3 kS = F;
         vec3 kD = max(vec3(1.0) - kS, vec3(0.0));
