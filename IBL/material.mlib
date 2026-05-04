@@ -1,21 +1,14 @@
 <?xml version="1.0" ?>
 <materialLib name="MyLib">
     <textures>
-        <texture name="left" filename="textures/nissibeach_cm/negx.jpg" />
-        <texture name="right" filename="textures/nissibeach_cm/posx.jpg" />
-        <texture name="front" filename="textures/nissibeach_cm/posz.jpg" />
-        <texture name="back" filename="textures/nissibeach_cm/negz.jpg" />
-        <texture name="top" filename="textures/nissibeach_cm/posy.jpg" />
-        <texture name="bottom" filename="textures/nissibeach_cm/negy.jpg" />
-
-        <cubeMap name="CM" mipmap="true" 
-            filePosX="textures/nissibeach_cm/posx.jpg"
-            fileNegX="textures/nissibeach_cm/negx.jpg"
-            filePosY="textures/nissibeach_cm/posy.jpg"
-            fileNegY="textures/nissibeach_cm/negy.jpg"
-            filePosZ="textures/nissibeach_cm/posz.jpg"
-            fileNegZ="textures/nissibeach_cm/negz.jpg"	
-        />
+        <!-- 1. Irradiance (Luz Difusa) -->
+        <texture name="irradianceMap" filename="textures/mirrored_hall/output_iem.dds" mipmap="false" />
+        
+        <!-- 2. Prefilter (Reflexos e também o Fundo da Skybox) -->
+        <texture name="prefilterMap" filename="textures/mirrored_hall/output_pmrem.dds" mipmap="true" />
+        
+        <!-- 3. A LUT do PBR clássica -->
+        <texture name="brdfLUT" filename="textures/mirrored_hall/ibl_brdf_lut.png" mipmap="false" />
     </textures>
 
     <shaders>
@@ -54,12 +47,28 @@
                     <valueof uniform="baseReflectance" type="RENDERER" component="baseReflectance" />
                     <valueof uniform="IBL" type="RENDERER" component="IBL" />
 
-                    <valueof uniform="environmentMap" type="TEXTURE_BINDING" component="UNIT" id="0" />
+                    <valueof uniform="irradianceMap" type="TEXTURE_BINDING" component="UNIT" id="0" />
+                    <valueof uniform="prefilterMap"  type="TEXTURE_BINDING" component="UNIT" id="1" />
+                    <valueof uniform="brdfLUT"       type="TEXTURE_BINDING" component="UNIT" id="2" />
                 </values>
             </shader>
             <textures>
-                <texture name="CM" UNIT="0">
+                <texture name="irradianceMap" UNIT="0" >
+                    <MIN_FILTER value="LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                    <WRAP_R value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="prefilterMap" UNIT="1" >
                     <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                    <WRAP_R value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="brdfLUT" UNIT="2" >
+                    <MIN_FILTER value="LINEAR" />
                     <MAG_FILTER value="LINEAR" />
                     <WRAP_S value="CLAMP_TO_EDGE" />
                     <WRAP_T value="CLAMP_TO_EDGE" />
@@ -72,43 +81,19 @@
                 <values>
                     <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL" />
                     <valueof uniform="cam_pos" type="CAMERA" component="POSITION" />
-                    <valueof uniform="tex_back" type="TEXTURE_BINDING" component="UNIT" id ="0" />
-                    <valueof uniform="tex_left" type="TEXTURE_BINDING" component="UNIT" id ="1" />
-                    <valueof uniform="tex_front" type="TEXTURE_BINDING" component="UNIT" id ="2" />
-                    <valueof uniform="tex_right" type="TEXTURE_BINDING" component="UNIT" id ="3" />
-                    <valueof uniform="tex_top" type="TEXTURE_BINDING" component="UNIT" id ="4" />
-                    <valueof uniform="tex_bottom" type="TEXTURE_BINDING" component="UNIT" id ="5" />
-                    <valueof uniform="tex_cm" type="TEXTURE_BINDING" component="UNIT" id ="6" />
+                    
+                    <!-- Ligar apenas o PrefilterMap como textura da Skybox -->
+                    <valueof uniform="tex_cm" type="TEXTURE_BINDING" component="UNIT" id ="0" />
                 </values>
             </shader>
             <textures>
-                <texture name="back" UNIT="0" >
+                <!-- Usar o PrefilterMap no UNIT 0 -->
+                <texture name="prefilterMap" UNIT="0" >
+                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
                     <WRAP_S value="CLAMP_TO_EDGE" />
                     <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="left" UNIT="1" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="front" UNIT="2" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="right" UNIT="3" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="top" UNIT="4" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="bottom" UNIT="5" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="CM" UNIT="6" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
+                    <WRAP_R value="CLAMP_TO_EDGE" />
                 </texture>
             </textures>
             <state name="Skybox" />

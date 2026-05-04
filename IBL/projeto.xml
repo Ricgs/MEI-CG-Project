@@ -19,7 +19,7 @@
                 <TYPE value="PERSPECTIVE" />
                 <FOV value="60" />
                 <NEAR value="0.01" />
-                <FAR value="1000" />
+                <FAR value="5000" />
                 <POSITION x="0.0" y="1.0" z="18.0" />
                 <VIEW x="0.0" y="0.0" z="-1.0" />
                 <LOOK_AT_POINT x="0.0" y="1.0" z="17.0" />
@@ -59,7 +59,6 @@
         <scenes>
             <scene name="Sphere">
                 <TRANSLATE x="0" y="1" z="0" />
-                <!--file name="models/sphere.obj" param="USE_ADJACENCY, CALC_TANGENT"/-->
                 <geometry name="bolas" type="SPHERE" SLICES="64" STACKS="64" />
             </scene>
             <scene name="SkyBox" >
@@ -77,8 +76,9 @@
     <pipelines>
         <pipeline name="FixedPipeline" default="true">
 
-            <!--pass class="default" name="SkyBox">
-                <COLOR_CLEAR value="false" />
+            <pass class="default" name="SkyBox">
+                <COLOR_CLEAR value="true" />
+                <DEPTH_CLEAR value="true" />
 
                 <scenes>
                     <scene name="SkyBox" />
@@ -89,10 +89,11 @@
                 <materialMaps>
                     <map fromMaterial="*" toLibrary="MyLib" toMaterial="MatSkybox" />
                 </materialMaps>
-            </pass-->
+            </pass>
 
             <pass class="default" name="Spheres">
-                <COLOR_CLEAR value="true" />
+                <COLOR_CLEAR value="false" />
+                <DEPTH_CLEAR value="false" />
 
                 <scenes instances="49">
                     <scene name="Sphere" />
@@ -117,8 +118,7 @@
 
     <interface>
         <window label="BRDF Parameters">
-            <var label="BRDF Model" type="RENDERER" context="CURRENT" component="BRDF_model" strings="Original Cook-Torrance,Modern GGX" />
-            <var label="IBL" type="RENDERER" context="CURRENT" component="IBL" strings="Disabled,Enabled,v2" />
+            <var label="IBL" type="RENDERER" context="CURRENT" component="IBL" strings="Disabled,Enabled" />
 
             <var label="Light 1 Color" type="LIGHT" context="Light1" component="COLOR" />
             <var label="Light 1 Position" type="LIGHT" context="Light1" component="POSITION" def="min=-50.0 max=50.0" />
@@ -130,11 +130,7 @@
             <var label="Light 4 Position" type="LIGHT" context="Light4" component="POSITION" def="min=-50.0 max=50.0" />
 
             <var label="Albedo" type="RENDERER" context="CURRENT" component="albedo" mode="COLOR" />
-            <var label="Emissivity" type="RENDERER" context="CURRENT" component="emissivity" mode="COLOR" />
             <var label="Base Reflectance" type="RENDERER" context="CURRENT" component="baseReflectance" def="min=0.0 max=1.0"/>
-            <var label="Roughness" type="RENDERER" context="CURRENT" component="roughness" def="min=0.01 max=1.0" />
-            <var label="Specular Weight" type="RENDERER" context="CURRENT" component="specularWeight" def="min=0.0 max=1.0" />
-            <var label="Metallic" type="RENDERER" context="CURRENT" component="metallic" def="min=0.0 max=1.0" />
         </window>
     </interface>
 </project>

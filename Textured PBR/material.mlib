@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
 <materialLib name="MyLib">
     <textures>
-        <texture name="tex_albedo" filename="textures/pbr/wall/albedo.png" mipmap="true" />
-        <texture name="tex_roughness" filename="textures/pbr/wall/roughness.png" mipmap="true" />
-        <texture name="tex_metallic" filename="textures/pbr/wall/metallic.png" mipmap="true" />
-        <texture name="tex_normal" filename="textures/pbr/wall/normal.png" mipmap="true" />
-        <texture name="tex_ao" filename="textures/pbr/wall/ao.png" mipmap="true" />
+        <texture name="tex_albedo" filename="textures/pbr/rusted_iron/albedo.png" mipmap="true" />
+        <texture name="tex_roughness" filename="textures/pbr/rusted_iron/roughness.png" mipmap="true" />
+        <texture name="tex_metallic" filename="textures/pbr/rusted_iron/metallic.png" mipmap="true" />
+        <texture name="tex_normal" filename="textures/pbr/rusted_iron/normal.png" mipmap="true" />
+        <texture name="tex_ao" filename="textures/pbr/rusted_iron/ao.png" mipmap="true" />
     </textures>
 
     <shaders>

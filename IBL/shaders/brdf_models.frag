@@ -18,7 +18,9 @@ uniform float baseReflectance;
 uniform float specularWeight;
 uniform float ao;
 
-uniform samplerCube environmentMap;
+uniform samplerCube irradianceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D   brdfLUT;
 
 out vec4 outputColor;
 
@@ -44,7 +46,7 @@ vec2 integratebrdf(float NdotV, float roughness) {
 
 // ==============================================================================
 // ==============================================================================
-//                          2. MODERN COOK-TORRANCE (GGX)
+//                          MODERN COOK-TORRANCE (GGX)
 // ==============================================================================
 // ==============================================================================
 
@@ -88,7 +90,7 @@ float G_Modern(vec3 N, vec3 V, vec3 L, float roughness) {
 
 // ==============================================================================
 // ==============================================================================
-//                          3. RENDERING EQUATION (PBR)
+//                          RENDERING EQUATION (PBR)
 // ==============================================================================
 // ==============================================================================
 
@@ -102,11 +104,12 @@ vec3 PBR() {
 
     float NdotV = max(dot(N, V), 0.0001);
 
-    float F0_val = max(baseReflectance, 0.04);
-    vec3 F0 = mix(vec3(F0_val), albedo.rgb, DataIn.Metallic);
+    float roughness = DataIn.Roughness;
+    float Metallic = DataIn.Metallic;
+    float ao = 1.0;
 
-    float f0_mean = clamp((F0.x + F0.y + F0.z) / 3.0, 0.001, 0.99);
-    float n = (1.0 + sqrt(f0_mean)) / (1.0 - sqrt(f0_mean));
+    float F0_val = max(baseReflectance, 0.04);
+    vec3 F0 = mix(vec3(F0_val), albedo.rgb, Metallic);
 
     vec3 Lo = vec3(0.0);
     for (int i = 0; i < 4; i++) {
@@ -125,8 +128,8 @@ vec3 PBR() {
         float attenuation = 1.0 / (distance * distance);
         vec3 radiance = lightColors[i].rgb * attenuation;
 
-        float NDF = D_Modern(DataIn.Roughness, N, H);
-        float G = G_Modern(N, V, L, DataIn.Roughness);
+        float NDF = D_Modern(roughness, N, H);
+        float G = G_Modern(N, V, L, roughness);
         vec3 F = F_Modern(max(VdotH, 0.0), F0);
 
         vec3 numerator = NDF * G * F;
@@ -135,11 +138,41 @@ vec3 PBR() {
 
         vec3 kS = F;
         vec3 kD = max(vec3(1.0) - kS, vec3(0.0));
-        kD *= 1.0 - DataIn.Metallic;
+        kD *= 1.0 - Metallic;
 
         Lo += (kD * albedo.rgb / PI + specular) * radiance * NdotL;
     }
-    vec3 ambient = vec3(0.03) * albedo.rgb * ao;
+    
+    vec3 ambient;
+
+    switch (IBL) {
+        case 0:{
+            ambient = vec3(0.03) * albedo.rgb * ao;
+            break;
+        }
+        
+        case 1:{
+            vec3 R = reflect(-V, N);
+            vec3 F = fresnelSchlickRoughness(F0, max(dot(N, V), 0.0), roughness);
+            
+            vec3 kS = F;
+            vec3 kD = 1.0 - kS;
+            kD *= 1.0 - Metallic;	  
+            
+            vec3 irradiance = texture(irradianceMap, N).rgb;
+            vec3 diffuse    = irradiance * albedo.rgb;
+            
+            const float MAX_REFLECTION_LOD = 4.0; 
+            vec3 prefilteredColor = textureLod(prefilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;    
+            vec2 envBRDF          = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+            
+            vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+            
+            ambient = (kD * diffuse + specular) * ao;
+            break;
+        }
+    }
+
     vec3 color = Lo + ambient;
     
     return color;
