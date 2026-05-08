@@ -18,9 +18,9 @@ uniform float baseReflectance;
 uniform float specularWeight;
 uniform float ao;
 
-uniform samplerCube irradianceMap;
-uniform samplerCube prefilterMap;
-uniform sampler2D   brdfLUT;
+uniform sampler2D irr_posx, irr_negx, irr_posy, irr_negy, irr_posz, irr_negz;
+uniform sampler2D rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz;
+uniform sampler2D brdfLUT;
 
 out vec4 outputColor;
 
@@ -42,6 +42,42 @@ vec2 integratebrdf(float NdotV, float roughness) {
     vec4  r   = roughness * c0 + c1;
     float a004 = min(r.x * r.x, exp2(-9.28 * NdotV)) * r.x + r.y;
     return vec2(-1.04, 1.04) * a004 + r.zw;
+}
+
+vec3 GetIrradiance(vec3 dir) {
+    vec3 absDir = abs(dir);
+    vec2 uv;
+    
+    // Procura o eixo maior (Face) e calcula o UV projetado
+    if(absDir.x >= absDir.y && absDir.x >= absDir.z) {
+        if(dir.x > 0.0) { uv = vec2(-dir.z, -dir.y) / absDir.x; return texture(irr_posx, uv * 0.5 + 0.5).rgb; }
+        else            { uv = vec2( dir.z, -dir.y) / absDir.x; return texture(irr_negx, uv * 0.5 + 0.5).rgb; }
+    } else if(absDir.y >= absDir.x && absDir.y >= absDir.z) {
+        if(dir.y > 0.0) { uv = vec2( dir.x,  dir.z) / absDir.y; return texture(irr_posy, uv * 0.5 + 0.5).rgb; }
+        else            { uv = vec2( dir.x, -dir.z) / absDir.y; return texture(irr_negy, uv * 0.5 + 0.5).rgb; }
+    } else {
+        if(dir.z > 0.0) { uv = vec2( dir.x, -dir.y) / absDir.z; return texture(irr_posz, uv * 0.5 + 0.5).rgb; }
+        else            { uv = vec2(-dir.x, -dir.y) / absDir.z; return texture(irr_negz, uv * 0.5 + 0.5).rgb; }
+    }
+}
+
+vec3 GetRadiance(vec3 dir, float roughness) {
+    vec3 absDir = abs(dir);
+    vec2 uv;
+    float MAX_LOD = 5.0; // Ajusta este valor dependendo de quão desfocado queres o máximo
+    float lod = roughness * MAX_LOD;
+
+    // Procura o eixo maior, calcula o UV projetado e aplica o textureLod
+    if(absDir.x >= absDir.y && absDir.x >= absDir.z) {
+        if(dir.x > 0.0) { uv = vec2(-dir.z, -dir.y) / absDir.x; return textureLod(rad_posx, uv * 0.5 + 0.5, lod).rgb; }
+        else            { uv = vec2( dir.z, -dir.y) / absDir.x; return textureLod(rad_negx, uv * 0.5 + 0.5, lod).rgb; }
+    } else if(absDir.y >= absDir.x && absDir.y >= absDir.z) {
+        if(dir.y > 0.0) { uv = vec2( dir.x,  dir.z) / absDir.y; return textureLod(rad_posy, uv * 0.5 + 0.5, lod).rgb; }
+        else            { uv = vec2( dir.x, -dir.z) / absDir.y; return textureLod(rad_negy, uv * 0.5 + 0.5, lod).rgb; }
+    } else {
+        if(dir.z > 0.0) { uv = vec2( dir.x, -dir.y) / absDir.z; return textureLod(rad_posz, uv * 0.5 + 0.5, lod).rgb; }
+        else            { uv = vec2(-dir.x, -dir.y) / absDir.z; return textureLod(rad_negz, uv * 0.5 + 0.5, lod).rgb; }
+    }
 }
 
 // ==============================================================================
@@ -98,7 +134,7 @@ vec3 PBR() {
 
     vec4 lightPositions[4] = vec4[](lightPos0, lightPos1, lightPos2, lightPos3);
     vec4 lightColors[4]    = vec4[](lightCol0, lightCol1, lightCol2, lightCol3);
-
+    
     vec3 N = normalize(DataIn.Normal);
     vec3 V = normalize(camPos.xyz - DataIn.Pos);
 
@@ -152,20 +188,18 @@ vec3 PBR() {
         }
         
         case 1:{
+            vec3 irradiance = GetIrradiance(N);
             vec3 R = reflect(-V, N);
+            vec3 prefilteredColor = GetRadiance(R, roughness);
+            vec2 envBRDF  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+
             vec3 F = fresnelSchlickRoughness(F0, max(dot(N, V), 0.0), roughness);
             
             vec3 kS = F;
             vec3 kD = 1.0 - kS;
             kD *= 1.0 - Metallic;	  
             
-            vec3 irradiance = texture(irradianceMap, N).rgb;
             vec3 diffuse    = irradiance * albedo.rgb;
-            
-            const float MAX_REFLECTION_LOD = 4.0; 
-            vec3 prefilteredColor = textureLod(prefilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;    
-            vec2 envBRDF          = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
-            
             vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
             
             ambient = (kD * diffuse + specular) * ao;
