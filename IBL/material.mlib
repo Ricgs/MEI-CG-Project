@@ -82,21 +82,60 @@
                 </values>
             </shader>
             <textures>
-                <texture name="irradianceMap_posx" UNIT="1" />
-                <texture name="irradianceMap_negx" UNIT="2" />
-                <texture name="irradianceMap_posy" UNIT="3" />
-                <texture name="irradianceMap_negy" UNIT="4" />
-                <texture name="irradianceMap_posz" UNIT="5" />
-                <texture name="irradianceMap_negz" UNIT="6" />
+                <texture name="irradianceMap_posx" UNIT="1">
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="irradianceMap_negx" UNIT="2">
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="irradianceMap_posy" UNIT="3">
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="irradianceMap_negy" UNIT="4">
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="irradianceMap_posz" UNIT="5">
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="irradianceMap_negz" UNIT="6">
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
                 
-                <texture name="radianceMap_posx" UNIT="7" />
-                <texture name="radianceMap_negx" UNIT="8" />
-                <texture name="radianceMap_posy" UNIT="9" />
-                <texture name="radianceMap_negy" UNIT="10" />
-                <texture name="radianceMap_posz" UNIT="11" />
-                <texture name="radianceMap_negz" UNIT="12" />
-                
-                <texture name="brdfLUT" UNIT="13" />
+                <texture name="radianceMap_posx" UNIT="7">
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="radianceMap_negx" UNIT="8">
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="radianceMap_posy" UNIT="9">
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="radianceMap_negy" UNIT="10">
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="radianceMap_posz" UNIT="11">
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+                <texture name="radianceMap_negz" UNIT="12">
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
+
+                <texture name="brdfLUT" UNIT="13" >
+                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                </texture>
             </textures>
         </material>
 
