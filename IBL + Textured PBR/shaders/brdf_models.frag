@@ -3,11 +3,9 @@
 in Data {
     vec3 Pos;
     vec3 Normal;
-    vec3 Tangent;
     vec2 TexCoords;
 } DataIn;
 
-uniform int BRDF_model;
 uniform int IBL;
 
 uniform vec4 camPos;
@@ -18,11 +16,11 @@ uniform sampler2D normalMap;
 uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 uniform sampler2D aoMap;
-uniform vec4 emissivity;
 uniform float baseReflectance;
-uniform float specularWeight;
 
-uniform samplerCube environmentMap;
+uniform sampler2D irr_posx, irr_negx, irr_posy, irr_negy, irr_posz, irr_negz;
+uniform sampler2D rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz;
+uniform sampler2D brdfLUT;
 
 out vec4 outputColor;
 
@@ -36,22 +34,18 @@ const float PI = 3.14159265359;
 
 vec3 getNormalFromMap()
 {
-    // Lê o Normal Map (0 a 1) e converte para (-1 a 1)
     vec3 tangentNormal = texture(normalMap, DataIn.TexCoords).xyz * 2.0 - 1.0;
 
-    // Constrói a matriz TBN suavemente
-    vec3 N = normalize(DataIn.Normal);
-    vec3 T = normalize(DataIn.Tangent);
-    
-    // Re-ortogonaliza o T em relação ao N usando o processo Gram-Schmidt
-    T = normalize(T - dot(T, N) * N);
-    
-    // Calcula a Bitangente
-    vec3 B = cross(N, T);
-    
+    vec3 Q1  = dFdx(DataIn.Pos);
+    vec3 Q2  = dFdy(DataIn.Pos);
+    vec2 st1 = dFdx(DataIn.TexCoords);
+    vec2 st2 = dFdy(DataIn.TexCoords);
+
+    vec3 N   = normalize(DataIn.Normal);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
     mat3 TBN = mat3(T, B, N);
 
-    // Retorna a normal final no World Space
     return normalize(TBN * tangentNormal);
 }
 
@@ -73,9 +67,45 @@ vec2 integratebrdf(float NdotV, float roughness) {
     return vec2(-1.04, 1.04) * a004 + r.zw;
 }
 
+vec3 GetIrradiance(vec3 dir) {
+    vec3 absDir = abs(dir);
+    vec2 uv;
+    
+    // Procura o eixo maior (Face) e calcula o UV projetado
+    if(absDir.x >= absDir.y && absDir.x >= absDir.z) {
+        if(dir.x > 0.0) { uv = vec2(-dir.z, -dir.y) / absDir.x; return texture(irr_posx, uv * 0.5 + 0.5).rgb; }
+        else            { uv = vec2( dir.z, -dir.y) / absDir.x; return texture(irr_negx, uv * 0.5 + 0.5).rgb; }
+    } else if(absDir.y >= absDir.x && absDir.y >= absDir.z) {
+        if(dir.y > 0.0) { uv = vec2( dir.x,  dir.z) / absDir.y; return texture(irr_posy, uv * 0.5 + 0.5).rgb; }
+        else            { uv = vec2( dir.x, -dir.z) / absDir.y; return texture(irr_negy, uv * 0.5 + 0.5).rgb; }
+    } else {
+        if(dir.z > 0.0) { uv = vec2( dir.x, -dir.y) / absDir.z; return texture(irr_posz, uv * 0.5 + 0.5).rgb; }
+        else            { uv = vec2(-dir.x, -dir.y) / absDir.z; return texture(irr_negz, uv * 0.5 + 0.5).rgb; }
+    }
+}
+
+vec3 GetRadiance(vec3 dir, float roughness) {
+    vec3 absDir = abs(dir);
+    vec2 uv;
+    float MAX_LOD = 5.0; // Ajusta este valor dependendo de quão desfocado queres o máximo
+    float lod = roughness * MAX_LOD;
+
+    // Procura o eixo maior, calcula o UV projetado e aplica o textureLod
+    if(absDir.x >= absDir.y && absDir.x >= absDir.z) {
+        if(dir.x > 0.0) { uv = vec2(-dir.z, -dir.y) / absDir.x; return textureLod(rad_posx, uv * 0.5 + 0.5, lod).rgb; }
+        else            { uv = vec2( dir.z, -dir.y) / absDir.x; return textureLod(rad_negx, uv * 0.5 + 0.5, lod).rgb; }
+    } else if(absDir.y >= absDir.x && absDir.y >= absDir.z) {
+        if(dir.y > 0.0) { uv = vec2( dir.x,  dir.z) / absDir.y; return textureLod(rad_posy, uv * 0.5 + 0.5, lod).rgb; }
+        else            { uv = vec2( dir.x, -dir.z) / absDir.y; return textureLod(rad_negy, uv * 0.5 + 0.5, lod).rgb; }
+    } else {
+        if(dir.z > 0.0) { uv = vec2( dir.x, -dir.y) / absDir.z; return textureLod(rad_posz, uv * 0.5 + 0.5, lod).rgb; }
+        else            { uv = vec2(-dir.x, -dir.y) / absDir.z; return textureLod(rad_negz, uv * 0.5 + 0.5, lod).rgb; }
+    }
+}
+
 // ==============================================================================
 // ==============================================================================
-//                          2. MODERN COOK-TORRANCE (GGX)
+//                          MODERN COOK-TORRANCE (GGX)
 // ==============================================================================
 // ==============================================================================
 
@@ -119,7 +149,7 @@ float G_Modern(vec3 N, vec3 V, vec3 L, float roughness) {
 
 // ==============================================================================
 // ==============================================================================
-//                          3. RENDERING EQUATION (PBR)
+//                          RENDERING EQUATION (PBR)
 // ==============================================================================
 // ==============================================================================
 
@@ -133,16 +163,13 @@ vec3 PBR() {
     vec4 lightPositions[4] = vec4[](lightPos0, lightPos1, lightPos2, lightPos3);
     vec4 lightColors[4]    = vec4[](lightCol0, lightCol1, lightCol2, lightCol3);
 
-    vec3 N = normalize(DataIn.Normal);
+    vec3 N = getNormalFromMap();
     vec3 V = normalize(camPos.xyz - DataIn.Pos);
 
     float NdotV = max(dot(N, V), 0.0001);
 
     float F0_val = max(baseReflectance, 0.04);
     vec3 F0 = mix(vec3(F0_val), albedo.rgb, Metallic);
-
-    float f0_mean = clamp((F0.x + F0.y + F0.z) / 3.0, 0.001, 0.99);
-    float n = (1.0 + sqrt(f0_mean)) / (1.0 - sqrt(f0_mean));
 
     vec3 Lo = vec3(0.0);
     for (int i = 0; i < 4; i++) {
@@ -175,7 +202,35 @@ vec3 PBR() {
 
         Lo += (kD * albedo.rgb / PI + specular) * radiance * NdotL;
     }
-    vec3 ambient = vec3(0.03) * albedo.rgb * ao;
+    
+    vec3 ambient;
+
+    switch (IBL) {
+        case 0:{
+            ambient = vec3(0.03) * albedo.rgb * ao;
+            break;
+        }
+        
+        case 1:{
+            vec3 irradiance = GetIrradiance(N);
+            vec3 R = reflect(-V, N);
+            vec3 prefilteredColor = GetRadiance(R, roughness);
+            vec2 envBRDF  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+
+            vec3 F = fresnelSchlickRoughness(F0, max(dot(N, V), 0.0), roughness);
+            
+            vec3 kS = F;
+            vec3 kD = 1.0 - kS;
+            kD *= 1.0 - Metallic;	  
+            
+            vec3 diffuse    = irradiance * albedo.rgb;
+            vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+            
+            ambient = (kD * diffuse + specular) * ao;
+            break;
+        }
+    }
+
     vec3 color = Lo + ambient;
     
     return color;
