@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<project name="Biblioteca de BRDFs" width="1720" height="880">
+<project name="Biblioteca de Materiais" width="1720" height="880">
     <assets>
 
         <attributes>
@@ -36,19 +36,19 @@
         <lights>
             <light name="Light1">
                 <POSITION x="-4.0" y="4.0" z="4.0" w="1.0" />
-                <COLOR r="300.0" g="300.0" b="300.0" />
+                <COLOR r="0.0" g="0.0" b="0.0" />
             </light>
             <light name="Light2">
                 <POSITION x="4.0" y="4.0" z="4.0" w="1.0" />
-                <COLOR r="300.0" g="300.0" b="300.0" />
+                <COLOR r="0.0" g="0.0" b="0.0" />
             </light>
             <light name="Light3">
                 <POSITION x="-4.0" y="-4.0" z="4.0" w="1.0" />
-                <COLOR r="300.0" g="300.0" b="300.0" />
+                <COLOR r="0.0" g="0.0" b="0.0" />
             </light>
             <light name="Light4">
                 <POSITION x="4.0" y="-4.0" z="4.0" w="1.0" />
-                <COLOR r="300.0" g="300.0" b="300.0" />
+                <COLOR r="0.0" g="0.0" b="0.0" />
             </light>
         </lights>
 
@@ -90,7 +90,7 @@
             <pass class="default" name="Spheres">
                 <COLOR_CLEAR value="false" />
 
-                <scenes instances="49">
+                <scenes instances="1">
                     <scene name="Sphere" />
                 </scenes>
 
