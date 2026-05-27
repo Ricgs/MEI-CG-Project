@@ -18,7 +18,8 @@ uniform sampler2D roughnessMap;
 uniform sampler2D aoMap;
 uniform float baseReflectance;
 
-uniform sampler2D irr_posx, irr_negx, irr_posy, irr_negy, irr_posz, irr_negz;
+//uniform sampler2D irr_posx, irr_negx, irr_posy, irr_negy, irr_posz, irr_negz;
+uniform sampler2D texIrradianceRT;
 uniform sampler2D rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz;
 uniform sampler2D brdfLUT;
 
@@ -55,6 +56,13 @@ vec3 getNormalFromMap()
 // ==============================================================================
 // ==============================================================================
 
+vec2 DirectionToUV(vec3 dir) {
+    vec2 uv;
+    uv.x = atan(dir.x, dir.z) / (2.0 * PI) + 0.5;
+    uv.y = asin(clamp(dir.y, -1.0, 1.0)) / PI + 0.5;
+    return uv;
+}
+
 vec3 fresnelSchlickRoughness(vec3 F0, float cosTheta, float roughness) {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
@@ -67,7 +75,7 @@ vec2 integratebrdf(float NdotV, float roughness) {
     return vec2(-1.04, 1.04) * a004 + r.zw;
 }
 
-vec3 GetIrradiance(vec3 dir) {
+/*vec3 GetIrradiance(vec3 dir) {
     vec3 absDir = abs(dir);
     vec2 uv;
     
@@ -82,7 +90,7 @@ vec3 GetIrradiance(vec3 dir) {
         if(dir.z > 0.0) { uv = vec2( dir.x, -dir.y) / absDir.z; return texture(irr_posz, uv * 0.5 + 0.5).rgb; }
         else            { uv = vec2(-dir.x, -dir.y) / absDir.z; return texture(irr_negz, uv * 0.5 + 0.5).rgb; }
     }
-}
+}*/
 
 vec3 GetRadiance(vec3 dir, float roughness) {
     vec3 absDir = abs(dir);
@@ -212,7 +220,9 @@ vec3 PBR() {
         }
         
         case 1:{
-            vec3 irradiance = GetIrradiance(N);
+            vec2 irradianceUV = DirectionToUV(N);
+            vec3 diffuseIBL = texture(texIrradianceRT, irradianceUV).rgb * albedo;
+
             vec3 R = reflect(-V, N);
             vec3 prefilteredColor = GetRadiance(R, roughness);
             vec2 envBRDF  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
@@ -223,10 +233,9 @@ vec3 PBR() {
             vec3 kD = 1.0 - kS;
             kD *= 1.0 - Metallic;	  
             
-            vec3 diffuse    = irradiance * albedo.rgb;
             vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
             
-            ambient = (kD * diffuse + specular) * ao;
+            ambient = (kD * diffuseIBL + specular) * ao;
             break;
         }
     }

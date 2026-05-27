@@ -48,7 +48,6 @@ vec3 GetIrradiance(vec3 dir) {
     vec3 absDir = abs(dir);
     vec2 uv;
     
-    // Procura o eixo maior (Face) e calcula o UV projetado
     if(absDir.x >= absDir.y && absDir.x >= absDir.z) {
         if(dir.x > 0.0) { uv = vec2(-dir.z, -dir.y) / absDir.x; return texture(irr_posx, uv * 0.5 + 0.5).rgb; }
         else            { uv = vec2( dir.z, -dir.y) / absDir.x; return texture(irr_negx, uv * 0.5 + 0.5).rgb; }
@@ -64,10 +63,9 @@ vec3 GetIrradiance(vec3 dir) {
 vec3 GetRadiance(vec3 dir, float roughness) {
     vec3 absDir = abs(dir);
     vec2 uv;
-    float MAX_LOD = 5.0; // Ajusta este valor dependendo de quão desfocado queres o máximo
+    float MAX_LOD = 5.0;
     float lod = roughness * MAX_LOD;
 
-    // Procura o eixo maior, calcula o UV projetado e aplica o textureLod
     if(absDir.x >= absDir.y && absDir.x >= absDir.z) {
         if(dir.x > 0.0) { uv = vec2(-dir.z, -dir.y) / absDir.x; return textureLod(rad_posx, uv * 0.5 + 0.5, lod).rgb; }
         else            { uv = vec2( dir.z, -dir.y) / absDir.x; return textureLod(rad_negx, uv * 0.5 + 0.5, lod).rgb; }

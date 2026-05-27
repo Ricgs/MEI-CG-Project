@@ -87,6 +87,26 @@
                 </materialMaps>
             </pass>
 
+            <pass class="quad" name="Pass_BRDF_LUT">
+                <mode value="RUN_ONCE" />
+                
+                <viewport name="MainViewport" />
+                
+                <renderTarget name="brdfLUT_RT" fromLibrary="MyLib" />
+                
+                <material name="MatBRDF_LUT" fromLibrary="MyLib" />
+            </pass>
+
+            <pass class="quad" name="Pass_Irradiance">
+                <mode value="RUN_ONCE" />
+
+                <viewport name="MainViewport" />
+
+                <renderTarget name="irradiance_RT" fromLibrary="MyLib" />
+                
+                <material name="MatIrradiance" fromLibrary="MyLib" />
+            </pass>
+
             <pass class="default" name="Spheres">
                 <COLOR_CLEAR value="false" />
 

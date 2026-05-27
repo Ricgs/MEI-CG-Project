@@ -99,11 +99,11 @@ vec3 PBR() {
     float Metallic  = texture(metallicMap, DataIn.TexCoords).r;
     float roughness = texture(roughnessMap, DataIn.TexCoords).r;
     float ao        = texture(aoMap, DataIn.TexCoords).r;
+    vec3 N = getNormalFromMap();
 
     vec4 lightPositions[4] = vec4[](lightPos0, lightPos1, lightPos2, lightPos3);
     vec4 lightColors[4]    = vec4[](lightCol0, lightCol1, lightCol2, lightCol3);
 
-    vec3 N = getNormalFromMap();
     vec3 V = normalize(camPos.xyz - DataIn.Pos);
 
     float NdotV = max(dot(N, V), 0.0001);
