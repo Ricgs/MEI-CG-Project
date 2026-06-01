@@ -1,35 +1,14 @@
 <?xml version="1.0" ?>
 <materialLib name="MyLib">
     <textures>
-        <texture name="tex_albedo" filename="textures/pbr/wall/albedo.png" mipmap="true" />
-        <texture name="tex_roughness" filename="textures/pbr/wall/roughness.png" mipmap="true" />
-        <texture name="tex_metallic" filename="textures/pbr/wall/metallic.png" mipmap="true" />
-        <texture name="tex_normal" filename="textures/pbr/wall/normal.png" mipmap="true" />
-        <texture name="tex_ao" filename="textures/pbr/wall/ao.png" mipmap="true" />
+        <texture name="tex_albedo" filename="textures/pbr/grass/albedo.png" mipmap="true" />
+        <texture name="tex_roughness" filename="textures/pbr/grass/roughness.png" mipmap="true" />
+        <texture name="tex_metallic" filename="textures/pbr/grass/metallic.png" mipmap="true" />
+        <texture name="tex_normal" filename="textures/pbr/grass/normal.png" mipmap="true" />
+        <texture name="tex_ao" filename="textures/pbr/grass/ao.png" mipmap="true" />
 
-        <!--<texture name="irradianceMap_posx" filename="textures/mirrored_hall/output_iem_posx.hdr" />
-        <texture name="irradianceMap_negx" filename="textures/mirrored_hall/output_iem_negx.hdr" />
-        <texture name="irradianceMap_posy" filename="textures/mirrored_hall/output_iem_posy.hdr" />
-        <texture name="irradianceMap_negy" filename="textures/mirrored_hall/output_iem_negy.hdr" />
-        <texture name="irradianceMap_posz" filename="textures/mirrored_hall/output_iem_posz.hdr" />
-        <texture name="irradianceMap_negz" filename="textures/mirrored_hall/output_iem_negz.hdr" />
-
-        <texture name="radianceMap_posx" filename="textures/mirrored_hall/output_pmrem_posx.hdr" mipmap="true" />
-        <texture name="radianceMap_negx" filename="textures/mirrored_hall/output_pmrem_negx.hdr" mipmap="true" />
-        <texture name="radianceMap_posy" filename="textures/mirrored_hall/output_pmrem_posy.hdr" mipmap="true" />
-        <texture name="radianceMap_negy" filename="textures/mirrored_hall/output_pmrem_negy.hdr" mipmap="true" />
-        <texture name="radianceMap_posz" filename="textures/mirrored_hall/output_pmrem_posz.hdr" mipmap="true" />
-        <texture name="radianceMap_negz" filename="textures/mirrored_hall/output_pmrem_negz.hdr" mipmap="true" />
-
-
-        <texture name="brdfLUT" filename="textures/mirrored_hall/ibl_brdf_lut.png" mipmap="false" /-->
-
-        <texture name="skyboxMap_posx" filename="textures/mirrored_hall/output_skybox_posx.hdr" />
-        <texture name="skyboxMap_negx" filename="textures/mirrored_hall/output_skybox_negx.hdr" />
-        <texture name="skyboxMap_posy" filename="textures/mirrored_hall/output_skybox_posy.hdr" />
-        <texture name="skyboxMap_negy" filename="textures/mirrored_hall/output_skybox_negy.hdr" />
-        <texture name="skyboxMap_posz" filename="textures/mirrored_hall/output_skybox_posz.hdr" />
-        <texture name="skyboxMap_negz" filename="textures/mirrored_hall/output_skybox_negz.hdr" />
+        <texture name="tex_skyboxHDR" filename="textures/mirrored_hall/mirrored_hall_1k.hdr" />
+        <texture name="tex_skyboxVISUAL" filename="textures/mirrored_hall/mirrored_hall.jpg" />
     </textures>
 
     <shaders>
@@ -71,41 +50,16 @@
         <material name="MatIrradiance">
             <shader name="ShaderIrradiance">
                 <values>
-                    <valueof uniform="tex_posx" type="TEXTURE_BINDING" component="UNIT" id="0" />
-                    <valueof uniform="tex_negx" type="TEXTURE_BINDING" component="UNIT" id="1" />
-                    <valueof uniform="tex_posy" type="TEXTURE_BINDING" component="UNIT" id="2" />
-                    <valueof uniform="tex_negy" type="TEXTURE_BINDING" component="UNIT" id="3" />
-                    <valueof uniform="tex_posz" type="TEXTURE_BINDING" component="UNIT" id="4" />
-                    <valueof uniform="tex_negz" type="TEXTURE_BINDING" component="UNIT" id="5" />
+                    <valueof uniform="skyboxHDR" type="TEXTURE_BINDING" component="UNIT" id="0" />
                 </values>
             </shader>
             <textures>
-                <textures>
-                    <texture name="skyboxMap_posx" UNIT="0">
-                        <WRAP_S value="CLAMP_TO_EDGE" />
-                        <WRAP_T value="CLAMP_TO_EDGE" />
-                    </texture>
-                    <texture name="skyboxMap_negx" UNIT="1" >
-                        <WRAP_S value="CLAMP_TO_EDGE" />
-                        <WRAP_T value="CLAMP_TO_EDGE" />
-                    </texture>
-                    <texture name="skyboxMap_posy" UNIT="2" >
-                        <WRAP_S value="CLAMP_TO_EDGE" />
-                        <WRAP_T value="CLAMP_TO_EDGE" />
-                    </texture>
-                    <texture name="skyboxMap_negy" UNIT="3" >
-                        <WRAP_S value="CLAMP_TO_EDGE" />
-                        <WRAP_T value="CLAMP_TO_EDGE" />
-                    </texture>
-                    <texture name="skyboxMap_posz" UNIT="4" >
-                        <WRAP_S value="CLAMP_TO_EDGE" />
-                        <WRAP_T value="CLAMP_TO_EDGE" />
-                    </texture>
-                    <texture name="skyboxMap_negz" UNIT="5" >
-                        <WRAP_S value="CLAMP_TO_EDGE" />
-                        <WRAP_T value="CLAMP_TO_EDGE" />
-                    </texture>
-                </textures>
+                <texture name="tex_skyboxHDR" UNIT="0">
+                    <MIN_FILTER value="LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
             </textures>
         </material>
 
@@ -137,27 +91,9 @@
 
                     <valueof uniform="IBL" type="RENDERER" component="IBL" />
 
-                    <!-- AQUI! Ligar as 6 faces da Irradiância aos uniforms do Shader -->
-                    <!--valueof uniform="irr_posx" type="TEXTURE_BINDING" component="UNIT" id="6" />
-                    <valueof uniform="irr_negx" type="TEXTURE_BINDING" component="UNIT" id="7" />
-                    <valueof uniform="irr_posy" type="TEXTURE_BINDING" component="UNIT" id="8" />
-                    <valueof uniform="irr_negy" type="TEXTURE_BINDING" component="UNIT" id="9" />
-                    <valueof uniform="irr_posz" type="TEXTURE_BINDING" component="UNIT" id="10" />
-                    <valueof uniform="irr_negz" type="TEXTURE_BINDING" component="UNIT" id="11" /-->
-                    
-                    <!-- Ligar as 6 faces da Radiância/Prefilter -->
-                    <!--valueof uniform="rad_posx" type="TEXTURE_BINDING" component="UNIT" id="12" />
-                    <valueof uniform="rad_negx" type="TEXTURE_BINDING" component="UNIT" id="13" />
-                    <valueof uniform="rad_posy" type="TEXTURE_BINDING" component="UNIT" id="14" />
-                    <valueof uniform="rad_negy" type="TEXTURE_BINDING" component="UNIT" id="15" />
-                    <valueof uniform="rad_posz" type="TEXTURE_BINDING" component="UNIT" id="16" />
-                    <valueof uniform="rad_negz" type="TEXTURE_BINDING" component="UNIT" id="17" /-->
-                    
-                    <!-- Ligar a LUT -->
-                    <!--valueof uniform="brdfLUT" type="TEXTURE_BINDING" component="UNIT" id="18" /-->
-
                     <valueof uniform="texIrradianceRT" type="TEXTURE_BINDING" component="UNIT" id="6" />
-                    <valueof uniform="brdfLUT" type="TEXTURE_BINDING" component="UNIT" id="18" />
+                    <valueof uniform="brdfLUT" type="TEXTURE_BINDING" component="UNIT" id="7" />
+                    <valueof uniform="skyboxHDR" type="TEXTURE_BINDING" component="UNIT" id="8" />
                 </values>
             </shader>
             <textures>
@@ -183,67 +119,9 @@
                     <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
                     <MAG_FILTER value="LINEAR" />
                 </texture>
-
-                <!--texture name="irradianceMap_posx" UNIT="6">
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="irradianceMap_negx" UNIT="7">
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="irradianceMap_posy" UNIT="8">
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="irradianceMap_negy" UNIT="9">
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="irradianceMap_posz" UNIT="10">
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="irradianceMap_negz" UNIT="11">
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                
-                <texture name="radianceMap_posx" UNIT="12">
-                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="radianceMap_negx" UNIT="13">
-                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="radianceMap_posy" UNIT="14">
-                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="radianceMap_negy" UNIT="15">
-                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="radianceMap_posz" UNIT="16">
-                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="radianceMap_negz" UNIT="17">
-                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-
-                <texture name="brdfLUT" UNIT="18" >
-                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
-                    <MAG_FILTER value="LINEAR" />
-                </texture>/-->
+                <texture name="irradiance_tex" UNIT="6" /> 
+                <texture name="lut" UNIT="7" />
+                <texture name="tex_skyboxHDR" UNIT="8" />
             </textures>
         </material>
 
@@ -253,37 +131,13 @@
                     <valueof uniform="m_pvm" type="RENDERER" component="PROJECTION_VIEW_MODEL" />
                     <valueof uniform="cam_pos" type="CAMERA" component="POSITION" />
                     
-                    <!-- AQUI! O teu skybox.frag pede estas 6 texturas separadas -->
-                    <valueof uniform="tex_right"  type="TEXTURE_BINDING" component="UNIT" id="0" />
-                    <valueof uniform="tex_left"   type="TEXTURE_BINDING" component="UNIT" id="1" />
-                    <valueof uniform="tex_top"    type="TEXTURE_BINDING" component="UNIT" id="2" />
-                    <valueof uniform="tex_bottom" type="TEXTURE_BINDING" component="UNIT" id="3" />
-                    <valueof uniform="tex_front"  type="TEXTURE_BINDING" component="UNIT" id="4" />
-                    <valueof uniform="tex_back"   type="TEXTURE_BINDING" component="UNIT" id="5" />
+                    <valueof uniform="tex_skybox_hdr" type="TEXTURE_BINDING" component="UNIT" id="0" />
                 </values>
             </shader>
             <textures>
-                <texture name="skyboxMap_posx" UNIT="0">
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="skyboxMap_negx" UNIT="1" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="skyboxMap_posy" UNIT="2" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="skyboxMap_negy" UNIT="3" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="skyboxMap_posz" UNIT="4" >
-                    <WRAP_S value="CLAMP_TO_EDGE" />
-                    <WRAP_T value="CLAMP_TO_EDGE" />
-                </texture>
-                <texture name="skyboxMap_negz" UNIT="5" >
+                <texture name="tex_skyboxVISUAL" UNIT="0">
+                    <MIN_FILTER value="LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
                     <WRAP_S value="CLAMP_TO_EDGE" />
                     <WRAP_T value="CLAMP_TO_EDGE" />
                 </texture>

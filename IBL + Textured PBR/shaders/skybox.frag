@@ -1,43 +1,22 @@
 #version 460
 
-uniform sampler2D tex_back, tex_left, tex_front,
-                    tex_right, tex_top, tex_bottom;
-uniform samplerCube tex_cm;
-in vec2 tc;
+uniform sampler2D tex_skybox_hdr;
 in vec4 pos;
-in vec3 n;
 
 out vec4 color;
 
-const bool USE_CUBE_MAP = false;
+const float PI = 3.14159265359;
+
+vec2 DirectionToUV(vec3 dir) {
+    vec2 uv;
+    uv.x = atan(dir.x, dir.z) / (2.0 * PI) + 0.5;
+    uv.y = asin(clamp(dir.y, -1.0, 1.0)) / PI + 0.5;
+    return uv;
+}
 
 void main() {
 
-    if (USE_CUBE_MAP == false) {
-        vec3 a = abs(n);
-        float m = max(a.x,max(a.y,a.z));
-
-        if (m == a.z) {
-            if (pos.z < 0)
-                color = texture(tex_back, vec2(tc.s, 1-tc.t));
-            else 
-                color = texture(tex_front, vec2(tc.s, 1-tc.t));
-        }
-        else if (m == a.x) {
-            if (pos.x < 0)
-                color = texture(tex_left, vec2(tc.s, 1-tc.t));
-            else
-
-                color = texture(tex_right, vec2(tc.s, 1-tc.t));
-        }
-        else {
-            if (pos.y > 0)
-                color = texture(tex_top, vec2(tc.s, 1-tc.t));
-            else
-                color = texture(tex_bottom, vec2(tc.s, 1-tc.t));
-        }
-    }
-    else {
-        color = texture(tex_cm, normalize(vec3(pos)));
-    }
+    vec3 dir = normalize(vec3(pos));
+    vec2 uv = DirectionToUV(dir); // Usa a função acima!
+    color = texture(tex_skybox_hdr, uv);
 }

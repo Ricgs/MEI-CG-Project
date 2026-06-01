@@ -19,6 +19,7 @@ uniform sampler2D aoMap;
 uniform float baseReflectance;
 
 //uniform sampler2D irr_posx, irr_negx, irr_posy, irr_negy, irr_posz, irr_negz;
+uniform sampler2D skyboxHDR;
 uniform sampler2D texIrradianceRT;
 uniform sampler2D rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz;
 uniform sampler2D brdfLUT;
@@ -75,40 +76,16 @@ vec2 integratebrdf(float NdotV, float roughness) {
     return vec2(-1.04, 1.04) * a004 + r.zw;
 }
 
-/*vec3 GetIrradiance(vec3 dir) {
-    vec3 absDir = abs(dir);
-    vec2 uv;
-    
-    // Procura o eixo maior (Face) e calcula o UV projetado
-    if(absDir.x >= absDir.y && absDir.x >= absDir.z) {
-        if(dir.x > 0.0) { uv = vec2(-dir.z, -dir.y) / absDir.x; return texture(irr_posx, uv * 0.5 + 0.5).rgb; }
-        else            { uv = vec2( dir.z, -dir.y) / absDir.x; return texture(irr_negx, uv * 0.5 + 0.5).rgb; }
-    } else if(absDir.y >= absDir.x && absDir.y >= absDir.z) {
-        if(dir.y > 0.0) { uv = vec2( dir.x,  dir.z) / absDir.y; return texture(irr_posy, uv * 0.5 + 0.5).rgb; }
-        else            { uv = vec2( dir.x, -dir.z) / absDir.y; return texture(irr_negy, uv * 0.5 + 0.5).rgb; }
-    } else {
-        if(dir.z > 0.0) { uv = vec2( dir.x, -dir.y) / absDir.z; return texture(irr_posz, uv * 0.5 + 0.5).rgb; }
-        else            { uv = vec2(-dir.x, -dir.y) / absDir.z; return texture(irr_negz, uv * 0.5 + 0.5).rgb; }
-    }
-}*/
-
 vec3 GetRadiance(vec3 dir, float roughness) {
-    vec3 absDir = abs(dir);
-    vec2 uv;
-    float MAX_LOD = 5.0; // Ajusta este valor dependendo de quão desfocado queres o máximo
+    // Converte o vetor de reflexão 3D para UV equiretangular
+    vec2 uv = DirectionToUV(dir);
+    
+    // Mapeia a rugosidade (0.0 a 1.0) para um nível de Mipmap (0.0 a max_lod)
+    // Como a imagem é 4K, podemos usar um nível máximo de detalhe por volta de 6.0 ou 7.0 para simular superfícies rugosas
+    float MAX_LOD = 6.0;
     float lod = roughness * MAX_LOD;
-
-    // Procura o eixo maior, calcula o UV projetado e aplica o textureLod
-    if(absDir.x >= absDir.y && absDir.x >= absDir.z) {
-        if(dir.x > 0.0) { uv = vec2(-dir.z, -dir.y) / absDir.x; return textureLod(rad_posx, uv * 0.5 + 0.5, lod).rgb; }
-        else            { uv = vec2( dir.z, -dir.y) / absDir.x; return textureLod(rad_negx, uv * 0.5 + 0.5, lod).rgb; }
-    } else if(absDir.y >= absDir.x && absDir.y >= absDir.z) {
-        if(dir.y > 0.0) { uv = vec2( dir.x,  dir.z) / absDir.y; return textureLod(rad_posy, uv * 0.5 + 0.5, lod).rgb; }
-        else            { uv = vec2( dir.x, -dir.z) / absDir.y; return textureLod(rad_negy, uv * 0.5 + 0.5, lod).rgb; }
-    } else {
-        if(dir.z > 0.0) { uv = vec2( dir.x, -dir.y) / absDir.z; return textureLod(rad_posz, uv * 0.5 + 0.5, lod).rgb; }
-        else            { uv = vec2(-dir.x, -dir.y) / absDir.z; return textureLod(rad_negz, uv * 0.5 + 0.5, lod).rgb; }
-    }
+    
+    return textureLod(skyboxHDR, uv, lod).rgb;
 }
 
 // ==============================================================================

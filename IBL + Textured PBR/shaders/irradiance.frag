@@ -3,34 +3,19 @@
 in vec2 texCoord;
 out vec4 FragColor;
 
-// Recebemos as 6 texturas separadas em vez de um samplerCube
-uniform sampler2D tex_posx;
-uniform sampler2D tex_negx;
-uniform sampler2D tex_posy;
-uniform sampler2D tex_negy;
-uniform sampler2D tex_posz;
-uniform sampler2D tex_negz;
+uniform sampler2D skyboxHDR;
 
 const float PI = 3.14159265359;
 
-// Função mágica que substitui o samplerCube nativo
-vec3 sampleSkybox(vec3 dir) {
-    vec3 absDir = abs(dir);
+// Função necessária para converter direção 3D para UV da imagem equiretangular 4K
+vec2 DirectionToUV(vec3 dir) {
     vec2 uv;
-    
-    if(absDir.x >= absDir.y && absDir.x >= absDir.z) {
-        if(dir.x > 0.0) { uv = vec2(-dir.z, -dir.y) / absDir.x; return texture(tex_posx, uv * 0.5 + 0.5).rgb; }
-        else            { uv = vec2( dir.z, -dir.y) / absDir.x; return texture(tex_negx, uv * 0.5 + 0.5).rgb; }
-    } else if(absDir.y >= absDir.x && absDir.y >= absDir.z) {
-        if(dir.y > 0.0) { uv = vec2( dir.x,  dir.z) / absDir.y; return texture(tex_posy, uv * 0.5 + 0.5).rgb; }
-        else            { uv = vec2( dir.x, -dir.z) / absDir.y; return texture(tex_negy, uv * 0.5 + 0.5).rgb; }
-    } else {
-        if(dir.z > 0.0) { uv = vec2( dir.x, -dir.y) / absDir.z; return texture(tex_posz, uv * 0.5 + 0.5).rgb; }
-        else            { uv = vec2(-dir.x, -dir.y) / absDir.z; return texture(tex_negz, uv * 0.5 + 0.5).rgb; }
-    }
+    uv.x = atan(dir.x, dir.z) / (2.0 * PI) + 0.5;
+    uv.y = asin(clamp(dir.y, -1.0, 1.0)) / PI + 0.5;
+    return uv;
 }
 
-// Converte coordenadas 2D (UV) num vetor de direção 3D
+// Converte coordenadas 2D (UV) num vetor de direção 3D para o hemisfério
 vec3 UVtoDirection(vec2 uv) {
     float phi = uv.x * 2.0 * PI - PI;
     float theta = uv.y * PI - (PI / 2.0);
@@ -52,17 +37,19 @@ void main() {
     vec3 right = normalize(cross(up, N));
     up = normalize(cross(N, right));
 
-    float sampleDelta = 0.025; 
+    float sampleDelta = 0.025;
     float nrSamples = 0.0; 
 
     for(float phi = 0.0; phi < 2.0 * PI; phi += sampleDelta) {
         for(float theta = 0.0; theta < 0.5 * PI; theta += sampleDelta) {
             
             vec3 tangentSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));
-            vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * N; 
-
-            // Lemos usando a nossa função personalizada em vez de 'texture(samplerCube)'
-            irradiance += sampleSkybox(sampleVec) * cos(theta) * sin(theta);
+            vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * N;
+            
+            // CORREÇÃO: Amostragem direta usando a nova textura equiretangular única
+            vec2 skyboxUV = DirectionToUV(sampleVec);
+            irradiance += texture(skyboxHDR, skyboxUV).rgb * cos(theta) * sin(theta);
+            
             nrSamples++;
         }
     }
