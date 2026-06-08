@@ -91,6 +91,61 @@
                 </materialMaps>
             </pass>
 
+            <pass class="quad" name="Pass_BRDF_LUT">
+                <mode value="RUN_ONCE" />
+                
+                <viewport name="MainViewport" />
+                
+                <renderTarget name="brdfLUT_RT" fromLibrary="MyLib" />
+                
+                <material name="MatBRDF_LUT" fromLibrary="MyLib" />
+            </pass>
+
+            <pass class="quad" name="Pass_Irradiance">
+                <mode value="RUN_ONCE" />
+
+                <viewport name="MainViewport" />
+
+                <renderTarget name="irradiance_RT" fromLibrary="MyLib" />
+                
+                <material name="MatIrradiance" fromLibrary="MyLib" />
+            </pass>
+
+            <pass class="quad" name="Pass_Prefilter_0">
+                <mode value="RUN_ONCE" />
+                <viewport name="MainViewport" />
+                <renderTarget name="prefilter_RT_0" fromLibrary="MyLib" />
+                <material name="MatPrefilter_0" fromLibrary="MyLib" />
+            </pass>
+
+            <pass class="quad" name="Pass_Prefilter_1">
+                <mode value="RUN_ONCE" />
+                <viewport name="MainViewport" />
+                <renderTarget name="prefilter_RT_1" fromLibrary="MyLib" />
+                <material name="MatPrefilter_1" fromLibrary="MyLib" />
+            </pass>
+
+            <pass class="quad" name="Pass_Prefilter_2">
+                <mode value="RUN_ONCE" />
+                <viewport name="MainViewport" />
+                <renderTarget name="prefilter_RT_2" fromLibrary="MyLib" />
+                <material name="MatPrefilter_2" fromLibrary="MyLib" />
+            </pass>
+
+            <pass class="quad" name="Pass_Prefilter_3">
+                <mode value="RUN_ONCE" />
+                <viewport name="MainViewport" />
+                <renderTarget name="prefilter_RT_3" fromLibrary="MyLib" />
+                <material name="MatPrefilter_3" fromLibrary="MyLib" />
+            </pass>
+
+            <pass class="quad" name="Pass_Prefilter_4">
+                <mode value="RUN_ONCE" />
+                <viewport name="MainViewport" />
+                <renderTarget name="prefilter_RT_4" fromLibrary="MyLib" />
+                <material name="MatPrefilter_4" fromLibrary="MyLib" />
+            </pass>
+
             <pass class="default" name="Spheres">
                 <COLOR_CLEAR value="false" />
                 <DEPTH_CLEAR value="false" />

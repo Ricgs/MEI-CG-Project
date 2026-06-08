@@ -18,9 +18,15 @@ uniform float baseReflectance;
 uniform float specularWeight;
 uniform float ao;
 
-uniform sampler2D irr_posx, irr_negx, irr_posy, irr_negy, irr_posz, irr_negz;
-uniform sampler2D rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz;
+uniform sampler2D skyboxHDR;
+uniform sampler2D texIrradianceRT;
 uniform sampler2D brdfLUT;
+
+uniform sampler2D prefilterMap_0; // Roughness 0.00
+uniform sampler2D prefilterMap_1; // Roughness 0.25
+uniform sampler2D prefilterMap_2; // Roughness 0.50
+uniform sampler2D prefilterMap_3; // Roughness 0.75
+uniform sampler2D prefilterMap_4; // Roughness 1.00
 
 out vec4 outputColor;
 
@@ -31,6 +37,13 @@ const float PI = 3.14159265359;
 //                         FOR IBL
 // ==============================================================================
 // ==============================================================================
+
+vec2 DirectionToUV(vec3 dir) {
+    vec2 uv;
+    uv.x = atan(dir.x, dir.z) / (2.0 * PI) + 0.5;
+    uv.y = asin(clamp(dir.y, -1.0, 1.0)) / PI + 0.5;
+    return uv;
+}
 
 vec3 fresnelSchlickRoughness(vec3 F0, float cosTheta, float roughness) {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
@@ -44,37 +57,25 @@ vec2 integratebrdf(float NdotV, float roughness) {
     return vec2(-1.04, 1.04) * a004 + r.zw;
 }
 
-vec3 GetIrradiance(vec3 dir) {
-    vec3 absDir = abs(dir);
-    vec2 uv;
-    
-    if(absDir.x >= absDir.y && absDir.x >= absDir.z) {
-        if(dir.x > 0.0) { uv = vec2(-dir.z, -dir.y) / absDir.x; return texture(irr_posx, uv * 0.5 + 0.5).rgb; }
-        else            { uv = vec2( dir.z, -dir.y) / absDir.x; return texture(irr_negx, uv * 0.5 + 0.5).rgb; }
-    } else if(absDir.y >= absDir.x && absDir.y >= absDir.z) {
-        if(dir.y > 0.0) { uv = vec2( dir.x,  dir.z) / absDir.y; return texture(irr_posy, uv * 0.5 + 0.5).rgb; }
-        else            { uv = vec2( dir.x, -dir.z) / absDir.y; return texture(irr_negy, uv * 0.5 + 0.5).rgb; }
-    } else {
-        if(dir.z > 0.0) { uv = vec2( dir.x, -dir.y) / absDir.z; return texture(irr_posz, uv * 0.5 + 0.5).rgb; }
-        else            { uv = vec2(-dir.x, -dir.y) / absDir.z; return texture(irr_negz, uv * 0.5 + 0.5).rgb; }
-    }
-}
-
 vec3 GetRadiance(vec3 dir, float roughness) {
-    vec3 absDir = abs(dir);
-    vec2 uv;
-    float MAX_LOD = 5.0;
-    float lod = roughness * MAX_LOD;
+    vec2 uv = DirectionToUV(dir);
+    
+    // Amostra das 5 texturas
+    vec3 color0 = texture(prefilterMap_0, uv).rgb;
+    vec3 color1 = texture(prefilterMap_1, uv).rgb;
+    vec3 color2 = texture(prefilterMap_2, uv).rgb;
+    vec3 color3 = texture(prefilterMap_3, uv).rgb;
+    vec3 color4 = texture(prefilterMap_4, uv).rgb;
 
-    if(absDir.x >= absDir.y && absDir.x >= absDir.z) {
-        if(dir.x > 0.0) { uv = vec2(-dir.z, -dir.y) / absDir.x; return textureLod(rad_posx, uv * 0.5 + 0.5, lod).rgb; }
-        else            { uv = vec2( dir.z, -dir.y) / absDir.x; return textureLod(rad_negx, uv * 0.5 + 0.5, lod).rgb; }
-    } else if(absDir.y >= absDir.x && absDir.y >= absDir.z) {
-        if(dir.y > 0.0) { uv = vec2( dir.x,  dir.z) / absDir.y; return textureLod(rad_posy, uv * 0.5 + 0.5, lod).rgb; }
-        else            { uv = vec2( dir.x, -dir.z) / absDir.y; return textureLod(rad_negy, uv * 0.5 + 0.5, lod).rgb; }
+    // Interpola com base no valor de rugosidade
+    if (roughness < 0.25) {
+        return mix(color0, color1, roughness / 0.25);
+    } else if (roughness < 0.50) {
+        return mix(color1, color2, (roughness - 0.25) / 0.25);
+    } else if (roughness < 0.75) {
+        return mix(color2, color3, (roughness - 0.50) / 0.25);
     } else {
-        if(dir.z > 0.0) { uv = vec2( dir.x, -dir.y) / absDir.z; return textureLod(rad_posz, uv * 0.5 + 0.5, lod).rgb; }
-        else            { uv = vec2(-dir.x, -dir.y) / absDir.z; return textureLod(rad_negz, uv * 0.5 + 0.5, lod).rgb; }
+        return mix(color3, color4, (roughness - 0.75) / 0.25);
     }
 }
 
@@ -186,7 +187,9 @@ vec3 PBR() {
         }
         
         case 1:{
-            vec3 irradiance = GetIrradiance(N);
+            vec2 irradianceUV = DirectionToUV(N);
+            vec3 diffuseIBL = texture(texIrradianceRT, irradianceUV).rgb * albedo.rgb;
+
             vec3 R = reflect(-V, N);
             vec3 prefilteredColor = GetRadiance(R, roughness);
             vec2 envBRDF  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
@@ -197,10 +200,9 @@ vec3 PBR() {
             vec3 kD = 1.0 - kS;
             kD *= 1.0 - Metallic;	  
             
-            vec3 diffuse    = irradiance * albedo.rgb;
             vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
             
-            ambient = (kD * diffuse + specular) * ao;
+            ambient = (kD * diffuseIBL + specular) * ao;
             break;
         }
     }
