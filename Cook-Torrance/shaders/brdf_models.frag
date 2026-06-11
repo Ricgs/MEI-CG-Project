@@ -13,10 +13,7 @@ uniform vec4 camPos;
 uniform vec4 lightPos0, lightPos1, lightPos2, lightPos3;
 uniform vec4 lightCol0, lightCol1, lightCol2, lightCol3;
 uniform vec4 albedo;
-uniform vec4 emissivity;
 uniform float baseReflectance;
-uniform float specularWeight;
-uniform float ao;
 
 out vec4 outputColor;
 
@@ -205,10 +202,6 @@ vec3 PBR() {
 
 void main() {
 
-    vec3 debugNormal = normalize(DataIn.Normal) * 0.5 + 0.5;
-    
-    outputColor = vec4(debugNormal, 1.0);
-    
     vec3 color = PBR();
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));

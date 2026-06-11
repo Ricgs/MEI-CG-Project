@@ -152,10 +152,6 @@ vec3 PBR() {
 
 void main() {
 
-    vec3 debugNormal = normalize(DataIn.Normal) * 0.5 + 0.5;
-    
-    outputColor = vec4(debugNormal, 1.0);
-    
     vec3 color = PBR();
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));

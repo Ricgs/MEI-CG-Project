@@ -5,7 +5,6 @@ in vec3 normal;
 in vec2 texCoord0;
 
 uniform mat4 m_pvm, m_view, m_model;
-uniform mat3 m_normal;
 
 out Data {
     vec3 Pos;
