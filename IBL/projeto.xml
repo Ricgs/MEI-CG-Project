@@ -4,13 +4,16 @@
 
         <attributes>
             <attribute type="RENDERER" name="albedo" data="VEC4" x="1.0" y="0.0" z="0.0" />
-            <attribute type="RENDERER" name="emissivity" data="VEC4" x="0.0" y="0.0" z="0.0" />
             <attribute type="RENDERER" name="baseReflectance" data="FLOAT" value="0.04" /> 
             <attribute type="RENDERER" name="roughness" data="FLOAT" value="0.3" />
-            <attribute type="RENDERER" name="specularWeight" data="FLOAT" value="0.5" />
             <attribute type="RENDERER" name="metallic" data="FLOAT" value="0" />
-            <attribute type="RENDERER" name="BRDF_model" data="INT" value="0"/>
             <attribute type="RENDERER" name="IBL" data="INT" value="0"/>
+
+            <attribute type="RENDERER" name="roughness_0" data="FLOAT" value="0.0" />
+            <attribute type="RENDERER" name="roughness_1" data="FLOAT" value="0.25" />
+            <attribute type="RENDERER" name="roughness_2" data="FLOAT" value="0.5" />
+            <attribute type="RENDERER" name="roughness_3" data="FLOAT" value="0.75" />
+            <attribute type="RENDERER" name="roughness_4" data="FLOAT" value="1.0" />
         </attributes>
 
         <cameras>

@@ -7,7 +7,6 @@ uniform sampler2D skyboxHDR;
 
 const float PI = 3.14159265359;
 
-// Função necessária para converter direção 3D para UV da imagem equiretangular 4K
 vec2 DirectionToUV(vec3 dir) {
     vec2 uv;
     uv.x = atan(dir.x, dir.z) / (2.0 * PI) + 0.5;
@@ -15,7 +14,6 @@ vec2 DirectionToUV(vec3 dir) {
     return uv;
 }
 
-// Converte coordenadas 2D (UV) num vetor de direção 3D para o hemisfério
 vec3 UVtoDirection(vec2 uv) {
     float phi = uv.x * 2.0 * PI - PI;
     float theta = uv.y * PI - (PI / 2.0);
@@ -46,7 +44,6 @@ void main() {
             vec3 tangentSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));
             vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * N;
             
-            // CORREÇÃO: Amostragem direta usando a nova textura equiretangular única
             vec2 skyboxUV = DirectionToUV(sampleVec);
             irradiance += texture(skyboxHDR, skyboxUV).rgb * cos(theta) * sin(theta);
             

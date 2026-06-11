@@ -18,10 +18,8 @@ uniform sampler2D roughnessMap;
 uniform sampler2D aoMap;
 uniform float baseReflectance;
 
-//uniform sampler2D irr_posx, irr_negx, irr_posy, irr_negy, irr_posz, irr_negz;
 uniform sampler2D skyboxHDR;
 uniform sampler2D texIrradianceRT;
-uniform sampler2D rad_posx, rad_negx, rad_posy, rad_negy, rad_posz, rad_negz;
 uniform sampler2D brdfLUT;
 
 out vec4 outputColor;
@@ -77,11 +75,8 @@ vec2 integratebrdf(float NdotV, float roughness) {
 }
 
 vec3 GetRadiance(vec3 dir, float roughness) {
-    // Converte o vetor de reflexão 3D para UV equiretangular
     vec2 uv = DirectionToUV(dir);
     
-    // Mapeia a rugosidade (0.0 a 1.0) para um nível de Mipmap (0.0 a max_lod)
-    // Como a imagem é 4K, podemos usar um nível máximo de detalhe por volta de 6.0 ou 7.0 para simular superfícies rugosas
     float MAX_LOD = 6.0;
     float lod = roughness * MAX_LOD;
     

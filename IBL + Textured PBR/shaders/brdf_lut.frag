@@ -1,11 +1,10 @@
 #version 330
 
 in vec2 texCoord;
-out vec2 FragColor; // O resultado vai para a textura RG16F
+out vec2 FragColor;
 
 const float PI = 3.14159265359;
 
-// Sequência de Hammersley (para pseudo-aleatoriedade bem distribuída)
 float RadicalInverse_VdC(uint bits) {
     bits = (bits << 16u) | (bits >> 16u);
     bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
@@ -19,20 +18,17 @@ vec2 Hammersley(uint i, uint N) {
     return vec2(float(i)/float(N), RadicalInverse_VdC(i));
 }
 
-// Importância baseada em GGX (Trowbridge-Reitz)
 vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness) {
     float a = roughness * roughness;
     float phi = 2.0 * PI * Xi.x;
     float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a*a - 1.0) * Xi.y));
     float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
     
-    // De coordenadas esféricas para cartesianas
     vec3 H;
     H.x = cos(phi) * sinTheta;
     H.y = sin(phi) * sinTheta;
     H.z = cosTheta;
     
-    // Tangent-space para World-space
     vec3 up        = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
     vec3 tangent   = normalize(cross(up, N));
     vec3 bitangent = cross(N, tangent);
@@ -41,7 +37,6 @@ vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness) {
     return normalize(sampleVec);
 }
 
-// Função de Geometria de Smith (versão otimizada para IBL)
 float GeometrySchlickGGX(float NdotV, float roughness) {
     // Atenção: O parâmetro 'k' difere para IBL vs Luzes normais
     float a = roughness;
@@ -71,9 +66,8 @@ vec2 IntegrateBRDF(float NdotV, float roughness) {
 
     vec3 N = vec3(0.0, 0.0, 1.0);
     
-    const uint SAMPLE_COUNT = 1024u; // 1024 samples dá um ótimo resultado
+    const uint SAMPLE_COUNT = 1024u;
     for(uint i = 0u; i < SAMPLE_COUNT; ++i) {
-        // Gerar um vetor de amostra enviezado para o lóbulo especular
         vec2 Xi = Hammersley(i, SAMPLE_COUNT);
         vec3 H  = ImportanceSampleGGX(Xi, N, roughness);
         vec3 L  = normalize(2.0 * dot(V, H) * H - V);
@@ -97,8 +91,6 @@ vec2 IntegrateBRDF(float NdotV, float roughness) {
 }
 
 void main() {
-    // texCoord.x = NdotV (Ângulo de visão)
-    // texCoord.y = roughness (Rugosidade)
     vec2 integratedBRDF = IntegrateBRDF(texCoord.x, texCoord.y);
     FragColor = integratedBRDF;
 }

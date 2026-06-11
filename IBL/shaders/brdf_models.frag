@@ -13,9 +13,7 @@ uniform vec4 camPos;
 uniform vec4 lightPos0, lightPos1, lightPos2, lightPos3;
 uniform vec4 lightCol0, lightCol1, lightCol2, lightCol3;
 uniform vec4 albedo;
-uniform vec4 emissivity;
 uniform float baseReflectance;
-uniform float specularWeight;
 uniform float ao;
 
 uniform sampler2D skyboxHDR;
@@ -49,25 +47,15 @@ vec3 fresnelSchlickRoughness(vec3 F0, float cosTheta, float roughness) {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-vec2 integratebrdf(float NdotV, float roughness) {
-    const vec4 c0 = vec4(-1, -0.0275, -0.572, 0.022);
-    const vec4 c1 = vec4( 1,  0.0425,  1.04, -0.04);
-    vec4  r   = roughness * c0 + c1;
-    float a004 = min(r.x * r.x, exp2(-9.28 * NdotV)) * r.x + r.y;
-    return vec2(-1.04, 1.04) * a004 + r.zw;
-}
-
 vec3 GetRadiance(vec3 dir, float roughness) {
     vec2 uv = DirectionToUV(dir);
     
-    // Amostra das 5 texturas
     vec3 color0 = texture(prefilterMap_0, uv).rgb;
     vec3 color1 = texture(prefilterMap_1, uv).rgb;
     vec3 color2 = texture(prefilterMap_2, uv).rgb;
     vec3 color3 = texture(prefilterMap_3, uv).rgb;
     vec3 color4 = texture(prefilterMap_4, uv).rgb;
 
-    // Interpola com base no valor de rugosidade
     if (roughness < 0.25) {
         return mix(color0, color1, roughness / 0.25);
     } else if (roughness < 0.50) {
@@ -216,10 +204,6 @@ vec3 PBR() {
 
 void main() {
 
-    vec3 debugNormal = normalize(DataIn.Normal) * 0.5 + 0.5;
-    
-    outputColor = vec4(debugNormal, 1.0);
-    
     vec3 color = PBR();
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
