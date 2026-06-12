@@ -16,6 +16,8 @@
         <shader name="ShaderIrradiance" vs="shaders/brdf_lut.vert" ps="shaders/irradiance.frag" />
         <shader name="BRDF_models" vs="shaders/BRDF_models.vert" ps="shaders/BRDF_models.frag" />
         <shader name="SkyBox" vs="shaders/skybox.vert" ps="shaders/skybox.frag" />
+
+        <shader name="ShaderPrefilter" vs="shaders/brdf_lut.vert" ps="shaders/prefilter.frag" />
     </shaders>
 
     <renderTargets>
@@ -31,6 +33,27 @@
             <colors>
                 <color name="irradiance_tex" internalFormat="RGBA16F" />
             </colors>
+        </renderTarget>
+
+        <renderTarget name="prefilter_RT_0">
+            <SIZE width="512" height="512" />
+            <colors> <color name="prefilter_tex_0" internalFormat="RGBA16F" /> </colors>
+        </renderTarget>
+        <renderTarget name="prefilter_RT_1">
+            <SIZE width="256" height="256" />
+            <colors> <color name="prefilter_tex_1" internalFormat="RGBA16F" /> </colors>
+        </renderTarget>
+        <renderTarget name="prefilter_RT_2">
+            <SIZE width="128" height="128" />
+            <colors> <color name="prefilter_tex_2" internalFormat="RGBA16F" /> </colors>
+        </renderTarget>
+        <renderTarget name="prefilter_RT_3">
+            <SIZE width="64" height="64" />
+            <colors> <color name="prefilter_tex_3" internalFormat="RGBA16F" /> </colors>
+        </renderTarget>
+        <renderTarget name="prefilter_RT_4">
+            <SIZE width="32" height="32" />
+            <colors> <color name="prefilter_tex_4" internalFormat="RGBA16F" /> </colors>
         </renderTarget>
     </renderTargets>
 
@@ -60,6 +83,91 @@
                     <WRAP_S value="CLAMP_TO_EDGE" />
                     <WRAP_T value="CLAMP_TO_EDGE" />
                 </texture>
+            </textures>
+        </material>
+
+        <material name="MatPrefilter_0">
+            <shader name="ShaderPrefilter">
+                <values> 
+                    <valueof uniform="skyboxHDR" type="TEXTURE_BINDING" component="UNIT" id="0" /> 
+                    <valueof uniform="roughness" type="RENDERER" context="CURRENT" component="roughness_0" />
+                </values>
+            </shader>
+            <textures> 
+                <texture name="tex_skyboxHDR" UNIT="0">
+                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture> 
+            </textures>
+        </material>
+        
+        <material name="MatPrefilter_1">
+            <shader name="ShaderPrefilter">
+                <values> 
+                    <valueof uniform="skyboxHDR" type="TEXTURE_BINDING" component="UNIT" id="0" /> 
+                    <valueof uniform="roughness" type="RENDERER" context="CURRENT" component="roughness_1" />
+                </values>
+            </shader>
+            <textures> 
+                <texture name="tex_skyboxHDR" UNIT="0">
+                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture> 
+            </textures>
+        </material>
+        
+        <material name="MatPrefilter_2">
+            <shader name="ShaderPrefilter">
+                <values> 
+                    <valueof uniform="skyboxHDR" type="TEXTURE_BINDING" component="UNIT" id="0" /> 
+                    <valueof uniform="roughness" type="RENDERER" context="CURRENT" component="roughness_2" />
+                </values>
+            </shader>
+            <textures> 
+                <texture name="tex_skyboxHDR" UNIT="0">
+                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture> 
+            </textures>
+        </material>
+        
+        <material name="MatPrefilter_3">
+            <shader name="ShaderPrefilter">
+                <values> 
+                    <valueof uniform="skyboxHDR" type="TEXTURE_BINDING" component="UNIT" id="0" /> 
+                    <valueof uniform="roughness" type="RENDERER" context="CURRENT" component="roughness_3" />
+                </values>
+            </shader>
+            <textures> 
+                <texture name="tex_skyboxHDR" UNIT="0">
+                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture> 
+            </textures>
+        </material>
+
+        <material name="MatPrefilter_4">
+            <shader name="ShaderPrefilter">
+                <values> 
+                    <valueof uniform="skyboxHDR" type="TEXTURE_BINDING" component="UNIT" id="0" /> 
+                    <valueof uniform="roughness" type="RENDERER" context="CURRENT" component="roughness_4" />
+                </values>
+            </shader>
+            <textures> 
+                <texture name="tex_skyboxHDR" UNIT="0">
+                    <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture> 
             </textures>
         </material>
 
@@ -94,6 +202,12 @@
                     <valueof uniform="texIrradianceRT" type="TEXTURE_BINDING" component="UNIT" id="6" />
                     <valueof uniform="brdfLUT" type="TEXTURE_BINDING" component="UNIT" id="7" />
                     <valueof uniform="skyboxHDR" type="TEXTURE_BINDING" component="UNIT" id="8" />
+
+                    <valueof uniform="prefilterMap_0" type="TEXTURE_BINDING" component="UNIT" id="9" />
+                    <valueof uniform="prefilterMap_1" type="TEXTURE_BINDING" component="UNIT" id="10" />
+                    <valueof uniform="prefilterMap_2" type="TEXTURE_BINDING" component="UNIT" id="11" />
+                    <valueof uniform="prefilterMap_3" type="TEXTURE_BINDING" component="UNIT" id="12" />
+                    <valueof uniform="prefilterMap_4" type="TEXTURE_BINDING" component="UNIT" id="13" />
                 </values>
             </shader>
             <textures>
@@ -119,9 +233,36 @@
                     <MIN_FILTER value="LINEAR_MIPMAP_LINEAR" />
                     <MAG_FILTER value="LINEAR" />
                 </texture>
-                <texture name="irradiance_tex" UNIT="6" /> 
-                <texture name="lut" UNIT="7" />
+                <texture name="irradiance_tex" UNIT="6">
+                    <MIN_FILTER value="LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                </texture>
+                <texture name="lut" UNIT="7">
+                    <WRAP_S value="CLAMP_TO_EDGE" />
+                    <WRAP_T value="CLAMP_TO_EDGE" />
+                </texture>
                 <texture name="tex_skyboxHDR" UNIT="8" />
+
+                <texture name="prefilter_tex_0" UNIT="9">
+                    <MIN_FILTER value="LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                </texture>
+                <texture name="prefilter_tex_1" UNIT="10">
+                    <MIN_FILTER value="LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                </texture>
+                <texture name="prefilter_tex_2" UNIT="11">
+                    <MIN_FILTER value="LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                </texture>
+                <texture name="prefilter_tex_3" UNIT="12">
+                    <MIN_FILTER value="LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                </texture>
+                <texture name="prefilter_tex_4" UNIT="13">
+                    <MIN_FILTER value="LINEAR" />
+                    <MAG_FILTER value="LINEAR" />
+                </texture>
             </textures>
         </material>
 

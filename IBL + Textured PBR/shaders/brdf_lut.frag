@@ -11,7 +11,7 @@ float RadicalInverse_VdC(uint bits) {
     bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
     bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
     bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
-    return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+    return float(bits) * 2.3283064365386963e-10;
 }
 
 vec2 Hammersley(uint i, uint N) {
@@ -38,7 +38,6 @@ vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness) {
 }
 
 float GeometrySchlickGGX(float NdotV, float roughness) {
-    // Atenção: O parâmetro 'k' difere para IBL vs Luzes normais
     float a = roughness;
     float k = (a * a) / 2.0; 
     
@@ -78,7 +77,7 @@ vec2 IntegrateBRDF(float NdotV, float roughness) {
 
         if(NdotL > 0.0) {
             float G = GeometrySmith(N, V, L, roughness);
-            float G_Vis = (G * VdotH) / (NdotH * NdotV);
+            float G_Vis = (G * VdotH) / max(NdotH * NdotV, 0.001);
             float Fc = pow(1.0 - VdotH, 5.0);
 
             A += (1.0 - Fc) * G_Vis;
@@ -91,6 +90,8 @@ vec2 IntegrateBRDF(float NdotV, float roughness) {
 }
 
 void main() {
+    // texCoord.x = NdotV
+    // texCoord.y = roughness
     vec2 integratedBRDF = IntegrateBRDF(texCoord.x, texCoord.y);
     FragColor = integratedBRDF;
 }

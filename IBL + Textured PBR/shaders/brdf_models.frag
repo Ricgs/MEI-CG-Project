@@ -22,6 +22,12 @@ uniform sampler2D skyboxHDR;
 uniform sampler2D texIrradianceRT;
 uniform sampler2D brdfLUT;
 
+uniform sampler2D prefilterMap_0; // Roughness 0.00
+uniform sampler2D prefilterMap_1; // Roughness 0.25
+uniform sampler2D prefilterMap_2; // Roughness 0.50
+uniform sampler2D prefilterMap_3; // Roughness 0.75
+uniform sampler2D prefilterMap_4; // Roughness 1.00
+
 out vec4 outputColor;
 
 const float PI = 3.14159265359;
@@ -66,21 +72,24 @@ vec3 fresnelSchlickRoughness(vec3 F0, float cosTheta, float roughness) {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-vec2 integratebrdf(float NdotV, float roughness) {
-    const vec4 c0 = vec4(-1, -0.0275, -0.572, 0.022);
-    const vec4 c1 = vec4( 1,  0.0425,  1.04, -0.04);
-    vec4  r   = roughness * c0 + c1;
-    float a004 = min(r.x * r.x, exp2(-9.28 * NdotV)) * r.x + r.y;
-    return vec2(-1.04, 1.04) * a004 + r.zw;
-}
-
 vec3 GetRadiance(vec3 dir, float roughness) {
     vec2 uv = DirectionToUV(dir);
     
-    float MAX_LOD = 6.0;
-    float lod = roughness * MAX_LOD;
-    
-    return textureLod(skyboxHDR, uv, lod).rgb;
+    vec3 color0 = texture(prefilterMap_0, uv).rgb;
+    vec3 color1 = texture(prefilterMap_1, uv).rgb;
+    vec3 color2 = texture(prefilterMap_2, uv).rgb;
+    vec3 color3 = texture(prefilterMap_3, uv).rgb;
+    vec3 color4 = texture(prefilterMap_4, uv).rgb;
+
+    if (roughness < 0.25) {
+        return mix(color0, color1, roughness / 0.25);
+    } else if (roughness < 0.50) {
+        return mix(color1, color2, (roughness - 0.25) / 0.25);
+    } else if (roughness < 0.75) {
+        return mix(color2, color3, (roughness - 0.50) / 0.25);
+    } else {
+        return mix(color3, color4, (roughness - 0.75) / 0.25);
+    }
 }
 
 // ==============================================================================
@@ -221,10 +230,6 @@ vec3 PBR() {
 
 void main() {
 
-    vec3 debugNormal = normalize(DataIn.Normal) * 0.5 + 0.5;
-    
-    outputColor = vec4(debugNormal, 1.0);
-    
     vec3 color = PBR();
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
