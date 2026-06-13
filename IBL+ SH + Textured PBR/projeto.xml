@@ -1,0 +1,201 @@
+<?xml version="1.0" ?>
+<project name="Biblioteca de Materiais" width="1720" height="880">
+    <assets>
+
+        <attributes>
+            <attribute type="RENDERER" name="albedo" data="VEC4" x="1.0" y="0.0" z="0.0" />
+            <attribute type="RENDERER" name="baseReflectance" data="FLOAT" value="0.04" /> 
+            <attribute type="RENDERER" name="roughness" data="FLOAT" value="0.3" />
+            <attribute type="RENDERER" name="metallic" data="FLOAT" value="0" />
+            <attribute type="RENDERER" name="IBL" data="INT" value="0"/>
+
+            <attribute type="RENDERER" name="roughness_0" data="FLOAT" value="0.0" />
+            <attribute type="RENDERER" name="roughness_1" data="FLOAT" value="0.25" />
+            <attribute type="RENDERER" name="roughness_2" data="FLOAT" value="0.5" />
+            <attribute type="RENDERER" name="roughness_3" data="FLOAT" value="0.75" />
+            <attribute type="RENDERER" name="roughness_4" data="FLOAT" value="1.0" />
+
+            <attribute type="RENDERER" name="sh0" data="VEC3" x="0.5" y="0.5" z="0.5" />
+            <attribute type="RENDERER" name="sh1" data="VEC3" x="0.1" y="0.2" z="0.1" />
+            <attribute type="RENDERER" name="sh2" data="VEC3" x="-0.1" y="-0.2" z="-0.1" />
+            <attribute type="RENDERER" name="sh3" data="VEC3" x="0.0" y="0.1" z="0.0" />
+            <attribute type="RENDERER" name="sh4" data="VEC3" x="0.05" y="0.05" z="0.05" />
+            <attribute type="RENDERER" name="sh5" data="VEC3" x="-0.05" y="-0.05" z="-0.05" />
+            <attribute type="RENDERER" name="sh6" data="VEC3" x="0.1" y="0.1" z="0.1" />
+            <attribute type="RENDERER" name="sh7" data="VEC3" x="0.0" y="0.0" z="0.0" />
+            <attribute type="RENDERER" name="sh8" data="VEC3" x="0.02" y="0.02" z="0.02" />
+            <attribute type="RENDERER" name="shIntensity" data="FLOAT" value="1.5" />
+        </attributes>
+
+        <cameras>
+            <camera name="MainCamera">
+                <viewport name="MainViewport" />
+                <TYPE value="PERSPECTIVE" />
+                <FOV value="60" />
+                <NEAR value="0.01" />
+                <FAR value="5000" />
+                <POSITION x="0.0" y="1.0" z="18.0" />
+                <VIEW x="0.0" y="0.0" z="-1.0" />
+                <LOOK_AT_POINT x="0.0" y="1.0" z="17.0" />
+                <UP x="0.0" y="1.0" z="0.0" />
+            </camera>
+        </cameras>
+
+        <viewports>
+            <viewport name="MainViewport" >
+                <CLEAR_COLOR r="0.15" g="0.15" b="0.15" /> 
+            </viewport>
+        </viewports>
+
+        <lights>
+            <light name="Light1">
+                <POSITION x="-4.0" y="4.0" z="4.0" w="1.0" />
+                <COLOR r="0.0" g="0.0" b="0.0" />
+            </light>
+            <light name="Light2">
+                <POSITION x="4.0" y="4.0" z="4.0" w="1.0" />
+                <COLOR r="0.0" g="0.0" b="0.0" />
+            </light>
+            <light name="Light3">
+                <POSITION x="-4.0" y="-4.0" z="4.0" w="1.0" />
+                <COLOR r="0.0" g="0.0" b="0.0" />
+            </light>
+            <light name="Light4">
+                <POSITION x="4.0" y="-4.0" z="4.0" w="1.0" />
+                <COLOR r="0.0" g="0.0" b="0.0" />
+            </light>
+        </lights>
+
+        <scenes>
+            <scene name="Sphere">
+                <TRANSLATE x="0" y="1" z="0" />
+                <geometry name="bolas" type="SPHERE" SLICES="64" STACKS="64" />
+            </scene>
+            <scene name="SkyBox" >
+                <geometry name="skyBox" material="skybox" type="BOX" >
+                    <SCALE x="1000" y="1000" z="1000" />
+                </geometry>
+            </scene>
+        </scenes>
+
+        <materialLibs>
+            <materialLib filename="material.mlib" />
+        </materialLibs>
+    </assets>
+
+    <pipelines>
+        <pipeline name="FixedPipeline" default="true">
+
+            <pass class="default" name="SkyBox">
+                <COLOR_CLEAR value="true" />
+                <DEPTH_CLEAR value="true" />
+
+                <scenes>
+                    <scene name="SkyBox" />
+                </scenes>
+
+                <camera name="MainCamera" />
+
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="MyLib" toMaterial="MatSkybox" />
+                </materialMaps>
+            </pass>
+
+            <pass class="quad" name="Pass_BRDF_LUT">
+                <mode value="RUN_ONCE" />
+                
+                <viewport name="MainViewport" />
+                
+                <renderTarget name="brdfLUT_RT" fromLibrary="MyLib" />
+                
+                <material name="MatBRDF_LUT" fromLibrary="MyLib" />
+            </pass>
+
+            <pass class="quad" name="Pass_Irradiance">
+                <mode value="RUN_ONCE" />
+
+                <viewport name="MainViewport" />
+
+                <renderTarget name="irradiance_RT" fromLibrary="MyLib" />
+                
+                <material name="MatIrradiance" fromLibrary="MyLib" />
+            </pass>
+
+            <pass class="quad" name="Pass_Prefilter_0">
+                <mode value="RUN_ONCE" />
+                <viewport name="MainViewport" />
+                <renderTarget name="prefilter_RT_0" fromLibrary="MyLib" />
+                <material name="MatPrefilter_0" fromLibrary="MyLib" />
+            </pass>
+
+            <pass class="quad" name="Pass_Prefilter_1">
+                <mode value="RUN_ONCE" />
+                <viewport name="MainViewport" />
+                <renderTarget name="prefilter_RT_1" fromLibrary="MyLib" />
+                <material name="MatPrefilter_1" fromLibrary="MyLib" />
+            </pass>
+
+            <pass class="quad" name="Pass_Prefilter_2">
+                <mode value="RUN_ONCE" />
+                <viewport name="MainViewport" />
+                <renderTarget name="prefilter_RT_2" fromLibrary="MyLib" />
+                <material name="MatPrefilter_2" fromLibrary="MyLib" />
+            </pass>
+
+            <pass class="quad" name="Pass_Prefilter_3">
+                <mode value="RUN_ONCE" />
+                <viewport name="MainViewport" />
+                <renderTarget name="prefilter_RT_3" fromLibrary="MyLib" />
+                <material name="MatPrefilter_3" fromLibrary="MyLib" />
+            </pass>
+
+            <pass class="quad" name="Pass_Prefilter_4">
+                <mode value="RUN_ONCE" />
+                <viewport name="MainViewport" />
+                <renderTarget name="prefilter_RT_4" fromLibrary="MyLib" />
+                <material name="MatPrefilter_4" fromLibrary="MyLib" />
+            </pass>
+
+            <pass class="default" name="Spheres">
+                <COLOR_CLEAR value="false" />
+
+                <scenes instances="1">
+                    <scene name="Sphere" />
+                </scenes>
+
+                <camera name="MainCamera" />
+
+                <lights>
+                    <light name="Light1" />
+                    <light name="Light2" />
+                    <light name="Light3" />
+                    <light name="Light4" />
+                </lights>
+
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="MyLib" toMaterial="BRDF_models" />
+                </materialMaps>
+            </pass>
+
+        </pipeline>
+    </pipelines>
+
+    <interface>
+        <window label="BRDF Parameters">
+            <var label="IBL" type="RENDERER" context="CURRENT" component="IBL" strings="Disabled,Enabled,Spherical Harmonics" />
+
+            <var label="Light 1 Color" type="LIGHT" context="Light1" component="COLOR" />
+            <var label="Light 1 Position" type="LIGHT" context="Light1" component="POSITION" def="min=-50.0 max=50.0" />
+            <var label="Light 2 Color" type="LIGHT" context="Light2" component="COLOR" />
+            <var label="Light 2 Position" type="LIGHT" context="Light2" component="POSITION" def="min=-50.0 max=50.0" />
+            <var label="Light 3 Color" type="LIGHT" context="Light3" component="COLOR" />
+            <var label="Light 3 Position" type="LIGHT" context="Light3" component="POSITION" def="min=-50.0 max=50.0" />
+            <var label="Light 4 Color" type="LIGHT" context="Light4" component="COLOR" />
+            <var label="Light 4 Position" type="LIGHT" context="Light4" component="POSITION" def="min=-50.0 max=50.0" />
+
+            <var label="Base Reflectance" type="RENDERER" context="CURRENT" component="baseReflectance" def="min=0.0 max=1.0"/>
+            <var label="SH Intensity" type="RENDERER" context="CURRENT" component="shIntensity" def="min=0.0 max=10.0 step=0.1" />
+            
+        </window>
+    </interface>
+</project>

@@ -1,0 +1,77 @@
+#version 460
+
+// Lançamos apenas 1 thread que faz o trabalho todo de uma vez!
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+// A nossa textura HDRI de entrada
+uniform sampler2D skyboxHDR;
+
+// O nosso SSBO onde vamos guardar os resultados
+layout(std430, binding = 1) buffer SHBuffer {
+    vec4 sh_coefs[9]; // Usamos vec4 por causa do alinhamento da memória
+};
+
+const float PI = 3.14159265359;
+
+void main() {
+    // Inicializar os coeficientes a zero
+    vec3 sh[9];
+    for(int i=0; i<9; i++) sh[i] = vec3(0.0);
+
+    // Resolução da imagem (podes usar textureSize() se preferires)
+    ivec2 size = textureSize(skyboxHDR, 0);
+    float width = float(size.x);
+    float height = float(size.y);
+    
+    // O tamanho do "píxel" na esfera (dPhi * dTheta)
+    float dPhi = (2.0 * PI) / width;
+    float dTheta = PI / height;
+
+    // Fazer um loop por todos os píxeis da imagem HDRI
+    for (int y = 0; y < size.y; y++) {
+        float theta = PI * (float(y) + 0.5) / height;
+        float sinTheta = sin(theta);
+        
+        for (int x = 0; x < size.x; x++) {
+            float phi = 2.0 * PI * (float(x) + 0.5) / width;
+
+            // Converter (theta, phi) para direção cartesiana (x,y,z)
+            vec3 dir = vec3(sinTheta * cos(phi), cos(theta), sinTheta * sin(phi));
+            
+            // Ler a cor da textura
+            vec2 uv = vec2(float(x)/width, float(y)/height);
+            vec3 color = texture(skyboxHDR, uv).rgb;
+
+            // Peso de integração (solid angle)
+            float weight = sinTheta * dTheta * dPhi;
+            vec3 L = color * weight;
+
+            // Constantes base dos Spherical Harmonics
+            sh[0] += L * 0.282095;
+            sh[1] += L * 0.488603 * dir.y;
+            sh[2] += L * 0.488603 * dir.z;
+            sh[3] += L * 0.488603 * dir.x;
+            sh[4] += L * 1.092548 * dir.x * dir.y;
+            sh[5] += L * 1.092548 * dir.y * dir.z;
+            sh[6] += L * 0.315392 * (3.0 * dir.z * dir.z - 1.0);
+            sh[7] += L * 1.092548 * dir.x * dir.z;
+            sh[8] += L * 0.546274 * (dir.x * dir.x - dir.y * dir.y);
+        }
+    }
+
+    // Fatores de convolução para Irradiância
+    float A0 = PI;
+    float A1 = (2.0 * PI) / 3.0;
+    float A2 = PI / 4.0;
+
+    // Guardar os valores calculados no Buffer da Placa Gráfica!
+    sh_coefs[0] = vec4(sh[0] * A0, 1.0);
+    sh_coefs[1] = vec4(sh[1] * A1, 1.0);
+    sh_coefs[2] = vec4(sh[2] * A1, 1.0);
+    sh_coefs[3] = vec4(sh[3] * A1, 1.0);
+    sh_coefs[4] = vec4(sh[4] * A2, 1.0);
+    sh_coefs[5] = vec4(sh[5] * A2, 1.0);
+    sh_coefs[6] = vec4(sh[6] * A2, 1.0);
+    sh_coefs[7] = vec4(sh[7] * A2, 1.0);
+    sh_coefs[8] = vec4(sh[8] * A2, 1.0);
+}
