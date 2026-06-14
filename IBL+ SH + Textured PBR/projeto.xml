@@ -24,7 +24,7 @@
             <attribute type="RENDERER" name="sh6" data="VEC3" x="0.1" y="0.1" z="0.1" />
             <attribute type="RENDERER" name="sh7" data="VEC3" x="0.0" y="0.0" z="0.0" />
             <attribute type="RENDERER" name="sh8" data="VEC3" x="0.02" y="0.02" z="0.02" />
-            <attribute type="RENDERER" name="shIntensity" data="FLOAT" value="1.5" />
+            <attribute type="RENDERER" name="shIntensity" data="FLOAT" value="1.0" />
         </attributes>
 
         <cameras>
@@ -85,6 +85,11 @@
 
     <pipelines>
         <pipeline name="FixedPipeline" default="true">
+
+            <pass class="compute" name="Pass_Compute_SH">
+                <mode value="RUN_ONCE" />
+                <material name="MatComputeSH" fromLibrary="MyLib" dimX="1" dimY="1" dimZ="1" />
+            </pass>
 
             <pass class="default" name="SkyBox">
                 <COLOR_CLEAR value="true" />

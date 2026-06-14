@@ -28,10 +28,9 @@ uniform sampler2D prefilterMap_2; // Roughness 0.50
 uniform sampler2D prefilterMap_3; // Roughness 0.75
 uniform sampler2D prefilterMap_4; // Roughness 1.00
 
-// Novos uniforms para os coeficientes SH
-uniform vec3 sh0; uniform vec3 sh1; uniform vec3 sh2;
-uniform vec3 sh3; uniform vec3 sh4; uniform vec3 sh5;
-uniform vec3 sh6; uniform vec3 sh7; uniform vec3 sh8;
+layout(std430, binding = 1) buffer SHBuffer {
+    vec4 sh_coefs[9];
+};
 uniform float shIntensity;
 
 out vec4 outputColor;
@@ -70,18 +69,16 @@ vec3 getNormalFromMap()
 // Função para avaliar os Harmónicos Esféricos usando a Normal
 vec3 EvaluateSH(vec3 N) {
     vec3 result = vec3(0.0);
-    // Avaliação polinomial otimizada para SH de Grau 2
-    result += sh0;
-    result += sh1 * N.y;
-    result += sh2 * N.z;
-    result += sh3 * N.x;
-    result += sh4 * N.x * N.y;
-    result += sh5 * N.y * N.z;
-    result += sh6 * (3.0 * N.z * N.z - 1.0);
-    result += sh7 * N.z * N.x;
-    result += sh8 * (N.x * N.x - N.y * N.y);
-    
-    return max(result, vec3(0.0)); // Evita luz negativa
+    result += sh_coefs[0].rgb * 0.282095;
+    result += sh_coefs[1].rgb * 0.488603 * N.y;
+    result += sh_coefs[2].rgb * 0.488603 * N.z;
+    result += sh_coefs[3].rgb * 0.488603 * N.x;
+    result += sh_coefs[4].rgb * 1.092548 * N.x * N.y;
+    result += sh_coefs[5].rgb * 1.092548 * N.y * N.z;
+    result += sh_coefs[6].rgb * 0.315392 * (3.0 * N.z * N.z - 1.0);
+    result += sh_coefs[7].rgb * 1.092548 * N.z * N.x;
+    result += sh_coefs[8].rgb * 0.546274 * (N.x * N.x - N.y * N.y);
+    return max(result, vec3(0.0));
 }
 
 // ==============================================================================

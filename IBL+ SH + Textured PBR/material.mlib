@@ -18,7 +18,17 @@
         <shader name="SkyBox" vs="shaders/skybox.vert" ps="shaders/skybox.frag" />
 
         <shader name="ShaderPrefilter" vs="shaders/brdf_lut.vert" ps="shaders/prefilter.frag" />
+        <shader name="ShaderComputeSH" cs="shaders/compute_sh.comp" />
     </shaders>
+
+    <buffers>
+        <buffer name="SSBO_SH_Coeffs">
+            <DIM x="9" y="1" z="1" />
+            <structure>
+                <field value="VEC4" />
+            </structure>
+        </buffer>
+    </buffers>
 
     <renderTargets>
         <renderTarget name="brdfLUT_RT">
@@ -65,6 +75,22 @@
     </states>
 
     <materials>
+        <material name="MatComputeSH">
+            <shader name="ShaderComputeSH">
+                <values>
+                    <valueof uniform="skyboxHDR" type="TEXTURE_BINDING" component="UNIT" id="0" />
+                </values>
+            </shader>
+            <textures>
+                <texture name="tex_skyboxHDR" UNIT="0" />
+            </textures>
+            <buffers>
+                <buffer name="SSBO_SH_Coeffs">
+                    <TYPE value="SHADER_STORAGE" />
+                    <BINDING_POINT value="1" />
+                </buffer>
+            </buffers>
+        </material>
 
         <material name="MatBRDF_LUT">
             <shader name="ShaderBRDF_LUT" />
@@ -189,15 +215,6 @@
                     <valueof uniform="lightPos3" type="LIGHT" context="Light4" component="POSITION" />
                     <valueof uniform="lightCol3" type="LIGHT" context="Light4" component="COLOR" />
 
-                    <valueof uniform="sh0" type="RENDERER" component="sh0" />
-                    <valueof uniform="sh1" type="RENDERER" component="sh1" />
-                    <valueof uniform="sh2" type="RENDERER" component="sh2" />
-                    <valueof uniform="sh3" type="RENDERER" component="sh3" />
-                    <valueof uniform="sh4" type="RENDERER" component="sh4" />
-                    <valueof uniform="sh5" type="RENDERER" component="sh5" />
-                    <valueof uniform="sh6" type="RENDERER" component="sh6" />
-                    <valueof uniform="sh7" type="RENDERER" component="sh7" />
-                    <valueof uniform="sh8" type="RENDERER" component="sh8" />
                     <valueof uniform="shIntensity" type="RENDERER" component="shIntensity" />
 
                     <valueof uniform="albedoMap" type="TEXTURE_BINDING" component="UNIT" id="1" />
@@ -275,6 +292,12 @@
                     <MAG_FILTER value="LINEAR" />
                 </texture>
             </textures>
+            <buffers>
+                <buffer name="SSBO_SH_Coeffs">
+                    <TYPE value="SHADER_STORAGE" />
+                    <BINDING_POINT value="1" />
+                </buffer>
+            </buffers>
         </material>
 
         <material name="MatSkybox" >
