@@ -88,7 +88,8 @@
 
             <pass class="compute" name="Pass_Compute_SH">
                 <mode value="RUN_ONCE" />
-                <material name="MatComputeSH" fromLibrary="MyLib" dimX="1" dimY="1" dimZ="1" />
+                
+                <material name="MatComputeSH" fromLibrary="MyLib" dimX="64" dimY="32" dimZ="1" />
             </pass>
 
             <pass class="default" name="SkyBox">

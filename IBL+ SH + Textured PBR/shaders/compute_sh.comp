@@ -1,5 +1,11 @@
 #version 460
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+// Ativa a extensão que permite operações atómicas concorrentes em números decimais
+// Nota: GL_NV_shader_atomic_float é para placas NVIDIA. 
+// Se der erro de compilação noutra gráfica, tenta usar: GL_EXT_shader_atomic_float
+#extension GL_NV_shader_atomic_float : require
+
+// O GPU vai processar a imagem em pequenos blocos de 16x16 píxeis simultaneamente
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
 uniform sampler2D skyboxHDR;
 
@@ -11,71 +17,78 @@ const float PI = 3.14159265359;
 
 void main() {
     ivec2 size = textureSize(skyboxHDR, 0);
+    
+    // gl_GlobalInvocationID.xy dá-nos a coordenada (X, Y) exata do píxel atribuído a esta thread
+    ivec2 texelPos = ivec2(gl_GlobalInvocationID.xy);
+
     float width = float(size.x);
     float height = float(size.y);
-    
-    // 1. PROTEÇÃO CONTRA NaN: Se a textura ainda não carregou, sai sem estragar o buffer
-    if (width <= 1.0 || height <= 1.0) {
-        return; 
+
+    // PROTEÇÃO: Impede que threads leiam fora dos limites da imagem ou crash se a imagem não carregar
+    if (width <= 1.0 || height <= 1.0 || texelPos.x >= size.x || texelPos.y >= size.y) {
+        return;
     }
 
-    vec3 sh[9];
-    for(int i=0; i<9; i++) sh[i] = vec3(0.0);
-
-    // 2. OTIMIZAÇÃO DE LEITURA (Lê de 4 em 4 pixeis)
-    int stepSize = 4;
-    float dPhi = (2.0 * PI) / width;
-    float dTheta = PI / height;
-    float sampleArea = (dTheta * float(stepSize)) * (dPhi * float(stepSize));
-
-    for (int y = 0; y < size.y; y += stepSize) {
-        // Normalizamos a coordenada Y (0.0 a 1.0)
-        float v = (float(y) + 0.5) / height;
-        float theta = PI * v;
-        float sinTheta = sin(theta);
-        
-        for (int x = 0; x < size.x; x += stepSize) {
-            // Normalizamos a coordenada X (0.0 a 1.0)
-            float u = (float(x) + 0.5) / width;
-            
-            // --- CORREÇÃO DE ROTAÇÃO PARA ALINHAR COM O SKYBOX ---
-            // Subtrair 0.5 roda o ângulo de recolha de luz em 180 graus.
-            // (Nota: Se a luz ficar "espelhada" - a esquerda vir da direita, 
-            // podes trocar esta linha por: float phi = (1.0 - u) * 2.0 * PI;)
-            float phi = (u - 0.5) * 2.0 * PI;
-            
-            vec3 dir = vec3(sinTheta * cos(phi), cos(theta), sinTheta * sin(phi));
-            
-            // A leitura da textura na imagem HDRI mantém-se com o u, v originais
-            vec2 uv = vec2(u, v);
-            vec3 color = texture(skyboxHDR, uv).rgb;
-
-            float weight = sinTheta * sampleArea;
-            vec3 L = color * weight;
-
-            sh[0] += L * 0.282095;
-            sh[1] += L * 0.488603 * dir.y;
-            sh[2] += L * 0.488603 * dir.z;
-            sh[3] += L * 0.488603 * dir.x;
-            sh[4] += L * 1.092548 * dir.x * dir.y;
-            sh[5] += L * 1.092548 * dir.y * dir.z;
-            sh[6] += L * 0.315392 * (3.0 * dir.z * dir.z - 1.0);
-            sh[7] += L * 1.092548 * dir.x * dir.z;
-            sh[8] += L * 0.546274 * (dir.x * dir.x - dir.y * dir.y);
+    // Caso seja o primeiríssimo píxel a ser processado (apenas para garantir o W = 1.0 compatível com o resto do teu código)
+    // Assumimos que o motor Nau já inicia o buffer a zeros no arranque.
+    if (texelPos.x == 0 && texelPos.y == 0) {
+        for(int i = 0; i < 9; i++) {
+            sh_coefs[i].w = 1.0;
         }
     }
+
+    // Calcula a área da esfera representada por este único píxel
+    float dPhi = (2.0 * PI) / width;
+    float dTheta = PI / height;
+    float sampleArea = dTheta * dPhi; // Já não existe `stepSize`, lemos 1 para 1.
+
+    // -------------------------------------------------------------
+    // Cálculos de projeção equiretangular idênticos ao original
+    // -------------------------------------------------------------
+    float v = (float(texelPos.y) + 0.5) / height;
+    float theta = PI * v;
+    float sinTheta = sin(theta);
+
+    float u = (float(texelPos.x) + 0.5) / width;
+    float phi = (u - 0.5) * 2.0 * PI;
+
+    vec3 dir = vec3(sinTheta * cos(phi), cos(theta), sinTheta * sin(phi));
+    vec2 uv = vec2(u, v);
+    
+    // Ler a cor deste exato píxel no HDRI
+    vec3 color = texture(skyboxHDR, uv).rgb;
+    float weight = sinTheta * sampleArea;
+    vec3 L = color * weight;
+
+    // -------------------------------------------------------------
+    // Calcular as bases (Harmónicos Esféricos) e ponderações para este píxel
+    // -------------------------------------------------------------
+    float Y[9];
+    Y[0] = 0.282095;
+    Y[1] = 0.488603 * dir.y;
+    Y[2] = 0.488603 * dir.z;
+    Y[3] = 0.488603 * dir.x;
+    Y[4] = 1.092548 * dir.x * dir.y;
+    Y[5] = 1.092548 * dir.y * dir.z;
+    Y[6] = 0.315392 * (3.0 * dir.z * dir.z - 1.0);
+    Y[7] = 1.092548 * dir.x * dir.z;
+    Y[8] = 0.546274 * (dir.x * dir.x - dir.y * dir.y);
 
     float A0 = PI;
     float A1 = (2.0 * PI) / 3.0;
     float A2 = PI / 4.0;
+    float A[9] = float[](A0, A1, A1, A1, A2, A2, A2, A2, A2);
 
-    sh_coefs[0] = vec4(sh[0] * A0, 1.0);
-    sh_coefs[1] = vec4(sh[1] * A1, 1.0);
-    sh_coefs[2] = vec4(sh[2] * A1, 1.0);
-    sh_coefs[3] = vec4(sh[3] * A1, 1.0);
-    sh_coefs[4] = vec4(sh[4] * A2, 1.0);
-    sh_coefs[5] = vec4(sh[5] * A2, 1.0);
-    sh_coefs[6] = vec4(sh[6] * A2, 1.0);
-    sh_coefs[7] = vec4(sh[7] * A2, 1.0);
-    sh_coefs[8] = vec4(sh[8] * A2, 1.0);
+    // -------------------------------------------------------------
+    // SOMA ATÓMICA: Garante que múltiplas threads escrevam no SSBO 
+    // global concorrentemente sem corromper (apagar) os valores das outras
+    // -------------------------------------------------------------
+    for(int i = 0; i < 9; i++) {
+        float finalCoef = Y[i] * A[i];
+        
+        // As somas são feitas individualmente nas componentes r, g, b do vec4 no Buffer
+        atomicAdd(sh_coefs[i].x, L.r * finalCoef);
+        atomicAdd(sh_coefs[i].y, L.g * finalCoef);
+        atomicAdd(sh_coefs[i].z, L.b * finalCoef);
+    }
 }
