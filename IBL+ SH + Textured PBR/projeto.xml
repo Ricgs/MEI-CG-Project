@@ -24,7 +24,7 @@
             <attribute type="RENDERER" name="sh6" data="VEC3" x="0.1" y="0.1" z="0.1" />
             <attribute type="RENDERER" name="sh7" data="VEC3" x="0.0" y="0.0" z="0.0" />
             <attribute type="RENDERER" name="sh8" data="VEC3" x="0.02" y="0.02" z="0.02" />
-            <attribute type="RENDERER" name="shIntensity" data="FLOAT" value="1.0" />
+            <attribute type="RENDERER" name="shIntensity" data="FLOAT" value="0.302" />
         </attributes>
 
         <cameras>

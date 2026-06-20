@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <materialLib name="MyLib">
     <textures>
-        <texture name="tex_albedo" filename="textures/pbr/wall/albedo.png" mipmap="true" />
-        <texture name="tex_roughness" filename="textures/pbr/wall/roughness.png" mipmap="true" />
-        <texture name="tex_metallic" filename="textures/pbr/wall/metallic.png" mipmap="true" />
-        <texture name="tex_normal" filename="textures/pbr/wall/normal.png" mipmap="true" />
-        <texture name="tex_ao" filename="textures/pbr/wall/ao.png" mipmap="true" />
+        <texture name="tex_albedo" filename="textures/pbr/gold/albedo.png" mipmap="true" />
+        <texture name="tex_roughness" filename="textures/pbr/gold/roughness.png" mipmap="true" />
+        <texture name="tex_metallic" filename="textures/pbr/gold/metallic.png" mipmap="true" />
+        <texture name="tex_normal" filename="textures/pbr/gold/normal.png" mipmap="true" />
+        <texture name="tex_ao" filename="textures/pbr/gold/ao.png" mipmap="true" />
 
-        <texture name="tex_skyboxHDR" filename="textures/mirrored_hall/mirrored_hall_1k.hdr" />
+        <texture name="tex_skyboxHDR" filename="textures/mirrored_hall/mirrored_hall_1k.hdr" mipmap="true"/>
         <texture name="tex_skyboxVISUAL" filename="textures/mirrored_hall/mirrored_hall.jpg" />
     </textures>
 
