@@ -66,7 +66,6 @@ vec3 getNormalFromMap()
 // ==============================================================================
 // ==============================================================================
 
-// Função para avaliar os Harmónicos Esféricos usando a Normal
 vec3 EvaluateSH(vec3 N) {
     vec3 result = vec3(0.0);
     result += sh_coefs[0].rgb * 0.282095;

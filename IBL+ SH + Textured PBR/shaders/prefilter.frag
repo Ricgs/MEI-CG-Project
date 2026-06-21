@@ -77,22 +77,18 @@ void main() {
 
         float NdotL = max(dot(N, L), 0.0);
         if(NdotL > 0.0) {
-            // [NOVO] Variáveis extra necessárias para o cálculo da PDF do GGX
             float NdotH = max(dot(N, H), 0.0);
             float HdotV = max(dot(H, V), 0.0);
 
-            // [NOVO] 1. Calcular a PDF (Probability Density Function) da distribuição GGX
             float a = roughness * roughness;
             float a2 = max(a * a, 0.0001);
             float denom = (NdotH * NdotH * (a2 - 1.0) + 1.0);
             float D = a2 / (PI * denom * denom);
             float pdf = (D * NdotH / (4.0 * HdotV)) + 0.0001;
 
-            // [NOVO] 2. Calcular o ângulo sólido da amostra e mapear para o nível de Mipmap (LOD)
             float saSample = 1.0 / (float(SAMPLE_COUNT) * pdf + 0.0001);
             float mipLevel = (roughness == 0.0) ? 0.0 : 0.5 * log2(saSample / saTexel);
 
-            // [NOVO] 3. Amostrar usando textureLod() passando o mipLevel calculado
             vec2 sampleUV = DirectionToUV(L);
             prefilteredColor += textureLod(skyboxHDR, sampleUV, mipLevel).rgb * NdotL;
 
